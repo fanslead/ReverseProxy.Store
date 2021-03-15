@@ -268,7 +268,7 @@ namespace ReverseProxy.Store.EFCore
             //}
 
             SslProtocols? sslProtocols = null;
-            foreach (var protocolConfig in proxyHttpClientOptions.SslProtocols.Split(",").Select(s => Enum.Parse<SslProtocols>(s, ignoreCase: true)))
+            foreach (var protocolConfig in proxyHttpClientOptions?.SslProtocols?.Split(",").Select(s => Enum.Parse<SslProtocols>(s, ignoreCase: true)))
             {
                 sslProtocols = sslProtocols == null ? protocolConfig : sslProtocols | protocolConfig;
             }

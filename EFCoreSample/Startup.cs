@@ -1,3 +1,6 @@
+using EFCoreSample.Validator;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Microsoft.ReverseProxy.Middleware;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using ReverseProxy.Store.EFCore;
 
 namespace EFCoreSample
@@ -21,13 +26,22 @@ namespace EFCoreSample
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
             services.AddMemoryCache();
+            // Ìí¼ÓÑéÖ¤Æ÷
+            services.AddSingleton<IValidator<Cluster>, ClusterValidator>();
+            services.AddSingleton<IValidator<ProxyRoute>, ProxyRouteValidator>();
             services.AddDbContext<EFCoreDbContext>(options =>
                     options.UseMySql(
                         Configuration.GetConnectionString("Default"),
                         ServerVersion.AutoDetect(Configuration.GetConnectionString("Default")),
                         b => b.MigrationsAssembly("EFCoreSample")));
-            services.AddControllers();
+            services.AddControllers()
+                 .AddFluentValidation()
+                 .AddNewtonsoftJson(options => {
+                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                     options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                 });
             services.AddReverseProxy()
                 .LoadFromEFCore()
                 .AddProxyConfigFilter<CustomConfigFilter>();
@@ -46,6 +60,14 @@ namespace EFCoreSample
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EFCoreSample v1"));
 
+            app.UseCors(builder => {
+                builder
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    //.AllowCredentials()
+                    ;
+                });
             app.UseRouting();
 
             app.UseAuthorization();

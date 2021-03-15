@@ -16,6 +16,7 @@ namespace EFCoreSample
                 .UseSerilog((context, builder) =>
                 {
                     builder.WriteTo.Console();
+                    builder.WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day, restrictedToMinimumLevel : Serilog.Events.LogEventLevel.Information);
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
