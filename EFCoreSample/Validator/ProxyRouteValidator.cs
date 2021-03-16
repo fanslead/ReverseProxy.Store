@@ -22,6 +22,7 @@ namespace EFCoreSample.Validator
                     }
                     return true;
                 })
+                .When(x => x.Match != null)
                 .WithMessage("ProxyRoute.Match.Methods must in (GET, POST, PUT, DELETE, OPTIONS, HEAD, CONNECT, OPTIONS, TRACE)")
                 ;
         }

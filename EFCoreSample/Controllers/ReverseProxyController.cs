@@ -59,16 +59,44 @@ namespace EFCoreSample.Controllers
         {
             await _dbContext.Set<Cluster>().AddAsync(cluster);
             await _dbContext.SaveChangesAsync();
-            _reverseProxyStore.Reload();
-            return Ok();
+            ReloadConfig();
+            return Ok(new { Data = true });
         }
         [HttpPut("Cluster")]
         public async Task<ActionResult> UpdateCluster(Cluster cluster)
         {
-            _dbContext.Set<Cluster>().Update(cluster);
+            if (cluster.HealthCheck != null)
+                _dbContext.Remove(cluster.HealthCheck);
+            if (cluster.Destinations != null)
+                _dbContext.RemoveRange(cluster.Destinations);
+            if (cluster.HttpClient != null)
+                _dbContext.Remove(cluster.HttpClient);
+            if (cluster.HttpRequest != null)
+                _dbContext.Remove(cluster.HttpRequest);
+            if (cluster.SessionAffinity != null)
+                _dbContext.Remove(cluster.SessionAffinity);
+            if (cluster.Metadata != null)
+                _dbContext.RemoveRange(cluster.Metadata);
+
             await _dbContext.SaveChangesAsync();
-            _reverseProxyStore.Reload();
-            return Ok();
+
+            if (cluster.HealthCheck != null)
+                cluster.HealthCheck.Id = 0;
+            if (cluster.Destinations != null)
+                cluster.Destinations.ForEach(d => d.Id = 0);
+            if (cluster.HttpClient != null)
+                cluster.HttpClient.Id = 0;
+            if (cluster.HttpRequest != null)
+                cluster.HttpRequest.Id = 0;
+            if (cluster.SessionAffinity != null)
+                cluster.SessionAffinity.Id = 0;
+            if (cluster.Metadata != null)
+                cluster.Metadata.ForEach(d => d.Id = 0);
+
+            _dbContext.Update(cluster);
+            await _dbContext.SaveChangesAsync();
+            ReloadConfig();
+            return Ok(new { Data = true });
         }
         [HttpDelete("Cluster")]
         public async Task<ActionResult> DeleteCluster(string clusterId)
@@ -78,8 +106,8 @@ namespace EFCoreSample.Controllers
                 return NotFound();
             _dbContext.Set<Cluster>().Remove(cluster);
             await _dbContext.SaveChangesAsync();
-            _reverseProxyStore.Reload();
-            return Ok();
+            ReloadConfig();
+            return Ok(new { Data = true });
         }
         [HttpGet("ProxyRoute")]
         public async Task<ActionResult> GetProxyRoute()
@@ -110,16 +138,34 @@ namespace EFCoreSample.Controllers
         {
             await _dbContext.Set<ProxyRoute>().AddAsync(proxyRoute);
             await _dbContext.SaveChangesAsync();
-            _reverseProxyStore.Reload();
-            return Ok();
+            ReloadConfig();
+            return Ok(new { Data = true });
         }
         [HttpPut("ProxyRoute")]
         public async Task<ActionResult> UpdateProxyRoute(ProxyRoute proxyRoute)
         {
-            _dbContext.Set<ProxyRoute>().Update(proxyRoute);
+            if (proxyRoute.Match != null)
+                _dbContext.Remove(proxyRoute.Match);
+            if (proxyRoute.Transforms != null)
+                _dbContext.RemoveRange(proxyRoute.Transforms);
+            if (proxyRoute.Metadata != null)
+                _dbContext.RemoveRange(proxyRoute.Metadata);
+
             await _dbContext.SaveChangesAsync();
-            _reverseProxyStore.Reload();
-            return Ok();
+
+            if (proxyRoute.Match != null)
+            {
+                proxyRoute.Match.Id = 0;
+                proxyRoute.Match.Headers.ForEach(d => d.Id = 0);
+            }
+            if (proxyRoute.Transforms != null)
+                proxyRoute.Transforms.ForEach(d => d.Id = 0);
+            if (proxyRoute.Metadata != null)
+                proxyRoute.Metadata.ForEach(d => d.Id = 0);
+            _dbContext.Update(proxyRoute);
+            await _dbContext.SaveChangesAsync();
+            ReloadConfig();
+            return Ok(new { Data = true });
         }
         [HttpDelete("ProxyRoute")]
         public async Task<ActionResult> DeleteProxyRoute(int routeId)
@@ -129,8 +175,13 @@ namespace EFCoreSample.Controllers
                 return NotFound();
             _dbContext.Set<ProxyRoute>().Remove(cluster);
             await _dbContext.SaveChangesAsync();
-            _reverseProxyStore.Reload();
-            return Ok();
+            ReloadConfig();
+            return Ok(new { Data = true });
+        }
+
+        private void ReloadConfig()
+        {
+            Task.Factory.StartNew(() => _reverseProxyStore.Reload());
         }
     }
 }

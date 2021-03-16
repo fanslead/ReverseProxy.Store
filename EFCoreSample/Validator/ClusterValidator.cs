@@ -23,6 +23,7 @@ namespace EFCoreSample.Validator
                     }
                     return true;
                 })
+                .When(x=>x.HealthCheck!=null && x.HealthCheck.Passive!=null)
                 .WithMessage("Cluster.HealthCheck.Passive.ReactivationPeriod Must Format 00:00:00");
                 ;
             RuleFor(x => x.HealthCheck.Active.Interval)
@@ -34,6 +35,7 @@ namespace EFCoreSample.Validator
                     }
                     return true;
                 })
+                .When(x => x.HealthCheck != null && x.HealthCheck.Active != null)
                 .WithMessage("Cluster.HealthCheck.Active.Interval Must Format 00:00:00");
                 ;
             RuleFor(x => x.HealthCheck.Active.Timeout)
@@ -45,6 +47,7 @@ namespace EFCoreSample.Validator
                     }
                     return true;
                 })
+                .When(x => x.HealthCheck != null && x.HealthCheck.Active != null)
                 .WithMessage("Cluster.HealthCheck.Active.Timeout Must Format 00:00:00");
                 ;
             RuleFor(x => x.HttpClient.SslProtocols)
@@ -65,6 +68,7 @@ namespace EFCoreSample.Validator
                     }
                     return true;
                 })
+                .When(x => x.HttpClient != null)
                 .WithMessage("Cluster.HttpClient.SslProtocols Must in None|Ssl2|Ssl3|Default|Tls|Tls11|Tls12|Tls13");
                 ;
             RuleFor(x => x.HttpClient.ActivityContextHeaders)
@@ -76,6 +80,7 @@ namespace EFCoreSample.Validator
                     }
                     return true;
                 })
+                .When(x => x.HttpClient != null)
                 .WithMessage("Cluster.HttpClient.ActivityContextHeaders Must in None|Baggage|CorrelationContext|BaggageAndCorrelationContext");
                 ;
             RuleFor(x => x.HttpRequest.Timeout)
@@ -87,6 +92,7 @@ namespace EFCoreSample.Validator
                     }
                     return true;
                 })
+                .When(x => x.HttpRequest != null)
                 .WithMessage("Cluster.HttpRequest.Timeout Must Format 00:00:00");
                 ;
             RuleFor(x => x.HttpRequest.Version)
@@ -98,6 +104,7 @@ namespace EFCoreSample.Validator
                     }
                     return true;
                 })
+                .When(x => x.HttpRequest != null)
                 .WithMessage("Cluster.HttpRequest.Version Format error");
                 ;
             RuleFor(x => x.HttpRequest.VersionPolicy)
@@ -109,6 +116,7 @@ namespace EFCoreSample.Validator
                     }
                     return true;
                 })
+                .When(x => x.HttpRequest != null)
                 .WithMessage("Cluster.HttpRequest.VersionPolicy Must in RequestVersionOrLower|RequestVersionOrHigher|RequestVersionExact");
                 ;
         }
