@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.ReverseProxy.Store;
 using ReverseProxy.Store.EFCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -65,37 +66,76 @@ namespace EFCoreSample.Controllers
         [HttpPut("Cluster")]
         public async Task<ActionResult> UpdateCluster(Cluster cluster)
         {
-            if (cluster.HealthCheck != null)
-                _dbContext.Remove(cluster.HealthCheck);
-            if (cluster.Destinations != null)
-                _dbContext.RemoveRange(cluster.Destinations);
-            if (cluster.HttpClient != null)
-                _dbContext.Remove(cluster.HttpClient);
-            if (cluster.HttpRequest != null)
-                _dbContext.Remove(cluster.HttpRequest);
-            if (cluster.SessionAffinity != null)
-                _dbContext.Remove(cluster.SessionAffinity);
-            if (cluster.Metadata != null)
-                _dbContext.RemoveRange(cluster.Metadata);
+            var dbCluster = await _dbContext.Set<Cluster>()
+                   .Include(c => c.Metadata)
+                   .Include(c => c.Destinations)
+                   .Include(c => c.SessionAffinity).ThenInclude(s => s.Settings)
+                   .Include(c => c.HttpRequest)
+                   .Include(c => c.HttpClient)
+                   .Include(c => c.HealthCheck).ThenInclude(h => h.Active)
+                   .Include(c => c.HealthCheck).ThenInclude(h => h.Passive)
+                   .FirstAsync(c=>c.Id == cluster.Id);
+            using (var tran = _dbContext.Database.BeginTransaction())
+            {
+                try
+                {
 
-            await _dbContext.SaveChangesAsync();
+                    if (dbCluster.HealthCheck != null)
+                        _dbContext.Remove(dbCluster.HealthCheck);
+                    if (dbCluster.Destinations != null)
+                        _dbContext.RemoveRange(dbCluster.Destinations);
+                    if (dbCluster.HttpClient != null)
+                        _dbContext.Remove(dbCluster.HttpClient);
+                    if (dbCluster.HttpRequest != null)
+                        _dbContext.Remove(dbCluster.HttpRequest);
+                    if (dbCluster.SessionAffinity != null)
+                        _dbContext.Remove(dbCluster.SessionAffinity);
+                    if (dbCluster.Metadata != null)
+                        _dbContext.RemoveRange(dbCluster.Metadata);
 
-            if (cluster.HealthCheck != null)
-                cluster.HealthCheck.Id = 0;
-            if (cluster.Destinations != null)
-                cluster.Destinations.ForEach(d => d.Id = 0);
-            if (cluster.HttpClient != null)
-                cluster.HttpClient.Id = 0;
-            if (cluster.HttpRequest != null)
-                cluster.HttpRequest.Id = 0;
-            if (cluster.SessionAffinity != null)
-                cluster.SessionAffinity.Id = 0;
-            if (cluster.Metadata != null)
-                cluster.Metadata.ForEach(d => d.Id = 0);
+                    await _dbContext.SaveChangesAsync();
 
-            _dbContext.Update(cluster);
-            await _dbContext.SaveChangesAsync();
-            ReloadConfig();
+                    if (cluster.HealthCheck != null)
+                    {
+                        cluster.HealthCheck.Id = 0;
+                        dbCluster.HealthCheck = cluster.HealthCheck;
+                    }
+                    if (cluster.Destinations != null)
+                    {
+                        cluster.Destinations.ForEach(d => d.Id = 0);
+                        dbCluster.Destinations = cluster.Destinations;
+                    }
+                    if (cluster.HttpClient != null)
+                    {
+                        cluster.HttpClient.Id = 0;
+                        dbCluster.HttpClient = cluster.HttpClient;
+                    }
+                    if (cluster.HttpRequest != null)
+                    {
+                        cluster.HttpRequest.Id = 0;
+                        dbCluster.HttpRequest = cluster.HttpRequest;
+                    }
+                    if (cluster.SessionAffinity != null)
+                    {
+                        cluster.SessionAffinity.Id = 0;
+                        dbCluster.SessionAffinity = cluster.SessionAffinity;
+                    }
+                    if (cluster.Metadata != null)
+                    {
+                        cluster.Metadata.ForEach(d => d.Id = 0);
+                        dbCluster.Metadata = cluster.Metadata;
+                    }
+
+                    _dbContext.Update(dbCluster);
+                    await _dbContext.SaveChangesAsync();
+                    await tran.CommitAsync();
+                    ReloadConfig();
+                }catch(Exception ex)
+                {
+                    await tran.RollbackAsync();
+                    return Ok(new { Data = false, Message = ex.Message });
+                }
+            }
             return Ok(new { Data = true });
         }
         [HttpDelete("Cluster")]
@@ -144,27 +184,50 @@ namespace EFCoreSample.Controllers
         [HttpPut("ProxyRoute")]
         public async Task<ActionResult> UpdateProxyRoute(ProxyRoute proxyRoute)
         {
-            if (proxyRoute.Match != null)
-                _dbContext.Remove(proxyRoute.Match);
-            if (proxyRoute.Transforms != null)
-                _dbContext.RemoveRange(proxyRoute.Transforms);
-            if (proxyRoute.Metadata != null)
-                _dbContext.RemoveRange(proxyRoute.Metadata);
-
-            await _dbContext.SaveChangesAsync();
-
-            if (proxyRoute.Match != null)
+            var dbRoute = await _dbContext.Set<ProxyRoute>()
+                .Include(r => r.Match).ThenInclude(m => m.Headers)
+                .Include(r => r.Metadata)
+                .Include(r => r.Transforms)
+                .FirstAsync(r => r.Id == proxyRoute.Id);
+            using (var tran = _dbContext.Database.BeginTransaction())
             {
-                proxyRoute.Match.Id = 0;
-                proxyRoute.Match.Headers.ForEach(d => d.Id = 0);
+                try
+                {
+                    if (dbRoute.Match != null)
+                        _dbContext.Remove(dbRoute.Match);
+                    if (dbRoute.Transforms != null)
+                        _dbContext.RemoveRange(dbRoute.Transforms);
+                    if (dbRoute.Metadata != null)
+                        _dbContext.RemoveRange(dbRoute.Metadata);
+
+                    await _dbContext.SaveChangesAsync();
+
+                    if (proxyRoute.Match != null)
+                    {
+                        proxyRoute.Match.Id = 0;
+                        proxyRoute.Match.Headers.ForEach(d => d.Id = 0);
+                        dbRoute.Match = proxyRoute.Match;
+                    }
+                    if (proxyRoute.Transforms != null)
+                    {
+                        proxyRoute.Transforms.ForEach(d => d.Id = 0);
+                        dbRoute.Transforms = proxyRoute.Transforms;
+                    }
+                    if (proxyRoute.Metadata != null)
+                    {
+                        proxyRoute.Metadata.ForEach(d => d.Id = 0);
+                        dbRoute.Metadata = proxyRoute.Metadata;
+                    }
+                    _dbContext.Update(dbRoute);
+                    await _dbContext.SaveChangesAsync();
+                    await tran.CommitAsync();
+                    ReloadConfig();
+                }catch(Exception ex)
+                {
+                    await tran.RollbackAsync();
+                    return Ok(new { Data = false, Message = ex.Message });
+                }
             }
-            if (proxyRoute.Transforms != null)
-                proxyRoute.Transforms.ForEach(d => d.Id = 0);
-            if (proxyRoute.Metadata != null)
-                proxyRoute.Metadata.ForEach(d => d.Id = 0);
-            _dbContext.Update(proxyRoute);
-            await _dbContext.SaveChangesAsync();
-            ReloadConfig();
             return Ok(new { Data = true });
         }
         [HttpDelete("ProxyRoute")]
