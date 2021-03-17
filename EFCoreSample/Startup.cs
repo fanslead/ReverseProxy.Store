@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.SpaServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,8 @@ using Microsoft.ReverseProxy.Middleware;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ReverseProxy.Store.EFCore;
+using ReverseProxy.Store.EFCore.Management;
+using VueCliMiddleware;
 
 namespace EFCoreSample
 {
@@ -26,6 +29,10 @@ namespace EFCoreSample
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSpaStaticFiles(config => {
+                config.RootPath = "ClientApp/dist"; //此处build 对应vue项目的发布文件夹名。
+                                                     //如未配置vue项目的build文件夹名，则需修改为dist
+            });
             services.AddCors();
             services.AddMemoryCache();
             // 添加验证器
@@ -36,6 +43,8 @@ namespace EFCoreSample
                         Configuration.GetConnectionString("Default"),
                         ServerVersion.AutoDetect(Configuration.GetConnectionString("Default")),
                         b => b.MigrationsAssembly("EFCoreSample")));
+            services.AddTransient<IClusterManagement, ClusterManagement>();
+            services.AddTransient<IProxyRouteManagement, ProxyRouteManagement>();
             services.AddControllers()
                  .AddFluentValidation()
                  .AddNewtonsoftJson(options => {
@@ -60,6 +69,10 @@ namespace EFCoreSample
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EFCoreSample v1"));
 
+            #region 添加单页面web应用  vue
+            app.UseStaticFiles();
+            app.UseSpaStaticFiles();
+            #endregion
             app.UseCors(builder => {
                 builder
                     .AllowAnyOrigin()
@@ -96,7 +109,16 @@ namespace EFCoreSample
                     proxyPipeline.UsePassiveHealthChecks();
                 })
                .ConfigureEndpoints((builder, route) => builder.WithDisplayName($"ReverseProxy {route.RouteId}-{route.ClusterId}"));
+
+                endpoints.MapToVueCliProxy(
+                    "{*path}",
+                    new SpaOptions { SourcePath = "ClientApp" },
+                    npmScript: (System.Diagnostics.Debugger.IsAttached) ? "dev" : null,
+                    regex: "Compiled successfully",
+                    forceKill: true
+                    );
             });
+
         }
     }
 }
