@@ -125,7 +125,7 @@ namespace EFCoreSample.Controllers
                         cluster.Metadata.ForEach(d => d.Id = 0);
                         dbCluster.Metadata = cluster.Metadata;
                     }
-
+                    dbCluster.LoadBalancingPolicy = cluster.LoadBalancingPolicy;
                     _dbContext.Update(dbCluster);
                     await _dbContext.SaveChangesAsync();
                     await tran.CommitAsync();
@@ -218,6 +218,11 @@ namespace EFCoreSample.Controllers
                         proxyRoute.Metadata.ForEach(d => d.Id = 0);
                         dbRoute.Metadata = proxyRoute.Metadata;
                     }
+                    dbRoute.RouteId = proxyRoute.RouteId;
+                    dbRoute.ClusterId = proxyRoute.ClusterId;
+                    dbRoute.Order = proxyRoute.Order;
+                    dbRoute.AuthorizationPolicy = proxyRoute.AuthorizationPolicy;
+                    dbRoute.CorsPolicy = proxyRoute.CorsPolicy;
                     _dbContext.Update(dbRoute);
                     await _dbContext.SaveChangesAsync();
                     await tran.CommitAsync();
