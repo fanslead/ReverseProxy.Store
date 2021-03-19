@@ -84,7 +84,8 @@ namespace ReverseProxy.Store.EFCore.Management
                     if (proxyRoute.Match != null)
                     {
                         proxyRoute.Match.Id = 0;
-                        proxyRoute.Match.Headers.ForEach(d => d.Id = 0);
+                        if(proxyRoute.Match.Headers != null)
+                            proxyRoute.Match.Headers.ForEach(d => d.Id = 0);
                         dbRoute.Match = proxyRoute.Match;
                     }
                     if (proxyRoute.Transforms != null)
