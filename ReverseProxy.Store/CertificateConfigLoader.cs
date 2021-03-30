@@ -31,7 +31,7 @@ namespace ReverseProxy.Store
             else if (certificateConfig.IsFileCert)
             {
                 var certificatePath = Path.Combine(_hostEnvironment.ContentRootPath, certificateConfig.Path);
-                if (certificateConfig.KeyPath == null)
+                if (string.IsNullOrWhiteSpace(certificateConfig.KeyPath))
                 {
                     return new X509Certificate2(Path.Combine(_hostEnvironment.ContentRootPath, certificateConfig.Path), certificateConfig.Password);
                 }
@@ -120,7 +120,7 @@ namespace ReverseProxy.Store
         private static X509Certificate2 AttachPemRSAKey(X509Certificate2 certificate, string keyText, string password)
         {
             using var rsa = RSA.Create();
-            if (password == null)
+            if (string.IsNullOrWhiteSpace(password))
             {
                 rsa.ImportFromPem(keyText);
             }
@@ -135,7 +135,7 @@ namespace ReverseProxy.Store
         private static X509Certificate2 AttachPemDSAKey(X509Certificate2 certificate, string keyText, string password)
         {
             using var dsa = DSA.Create();
-            if (password == null)
+            if (string.IsNullOrWhiteSpace(password))
             {
                 dsa.ImportFromPem(keyText);
             }
@@ -150,7 +150,7 @@ namespace ReverseProxy.Store
         private static X509Certificate2 AttachPemECDSAKey(X509Certificate2 certificate, string keyText, string password)
         {
             using var ecdsa = ECDsa.Create();
-            if (password == null)
+            if (string.IsNullOrWhiteSpace(password))
             {
                 ecdsa.ImportFromPem(keyText);
             }
