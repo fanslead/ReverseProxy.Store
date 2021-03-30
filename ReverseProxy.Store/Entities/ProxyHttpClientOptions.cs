@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ReverseProxy.Store.EFCore
+namespace ReverseProxy.Store.Entity
 {
     public class ProxyHttpClientOptions
     {
@@ -20,7 +20,7 @@ namespace ReverseProxy.Store.EFCore
         /// <summary>
         /// A client certificate used to authenticate to the destination server.
         /// </summary>
-        public string ClientCertificate { get; init; }
+        public virtual CertificateConfig ClientCertificate { get; init; }
 
         /// <summary>
         /// Limits the number of connections used when communicating with the destination server.

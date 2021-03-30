@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ReverseProxy.Store.Entity;
 
 namespace ReverseProxy.Store.EFCore
 {
@@ -28,6 +29,7 @@ namespace ReverseProxy.Store.EFCore
         {
             BuildCluster(modelBuilder);
             BuildDestination(modelBuilder);
+            BuildProxyHttpClientOptions(modelBuilder);
             BuildSessionAffinityOptions(modelBuilder);
             BuildHealthCheckOptions(modelBuilder);
             BuildProxyRoute(modelBuilder);
@@ -77,6 +79,16 @@ namespace ReverseProxy.Store.EFCore
                 builder
                 .HasMany(p => p.Settings)
                 .WithOne()
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+        }
+        private void BuildProxyHttpClientOptions(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ProxyHttpClientOptions>(builder =>
+            {
+                builder
+                .HasOne(p => p.ClientCertificate)
+                .WithOne(s => s.ProxyHttpClientOptions)
                 .OnDelete(DeleteBehavior.Cascade);
             });
         }

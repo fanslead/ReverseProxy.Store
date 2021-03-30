@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
-using Microsoft.ReverseProxy.Abstractions;
-using Microsoft.ReverseProxy.Service;
+using Yarp.ReverseProxy.Abstractions;
+using Yarp.ReverseProxy.Service;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

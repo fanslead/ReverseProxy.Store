@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Primitives;
-using Microsoft.ReverseProxy.Abstractions;
-using Microsoft.ReverseProxy.Service;
+using Yarp.ReverseProxy.Abstractions;
+using Yarp.ReverseProxy.Service;
 using System.Collections.Generic;
 
-namespace Microsoft.ReverseProxy.Store
+namespace Yarp.ReverseProxy.Store
 {
     public class StoreProxyConfig : IProxyConfig
     {

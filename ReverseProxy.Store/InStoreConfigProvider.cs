@@ -1,11 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
-using Microsoft.ReverseProxy.Service;
+using Yarp.ReverseProxy.Service;
 using ReverseProxy.Store;
 using System;
 using System.Threading;
+using ReverseProxy.Store.Entity;
 
-namespace Microsoft.ReverseProxy.Store
+namespace Yarp.ReverseProxy.Store
 {
     public class InStoreConfigProvider : IProxyConfigProvider, IDisposable
     {

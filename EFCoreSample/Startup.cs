@@ -9,12 +9,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Microsoft.ReverseProxy.Middleware;
+using Yarp.ReverseProxy.Middleware;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ReverseProxy.Store.EFCore;
 using ReverseProxy.Store.EFCore.Management;
 using VueCliMiddleware;
+using ReverseProxy.Store.Entity;
 
 namespace EFCoreSample
 {

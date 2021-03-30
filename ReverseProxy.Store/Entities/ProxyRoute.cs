@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace ReverseProxy.Store.EFCore
+namespace ReverseProxy.Store.Entity
 {
     /// <summary>
     /// Describes a route that matches incoming requests based on a the <see cref="Match"/> criteria

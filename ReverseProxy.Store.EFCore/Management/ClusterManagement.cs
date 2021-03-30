@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.ReverseProxy.Store;
+using Yarp.ReverseProxy.Store;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ReverseProxy.Store.Entity;
 
 namespace ReverseProxy.Store.EFCore.Management
 {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ReverseProxy.Store.Entity;
 
 namespace ReverseProxy.Store.EFCore
 {

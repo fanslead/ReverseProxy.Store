@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using ReverseProxy.Store.EFCore;
+using ReverseProxy.Store.Entity;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -76,7 +76,7 @@ namespace EFCoreSample.Validator
                 {
                     if (!string.IsNullOrWhiteSpace(activityContextHeaders))
                     {
-                        return Enum.TryParse<Microsoft.ReverseProxy.Abstractions.ActivityContextHeaders>(activityContextHeaders, ignoreCase: true, out Microsoft.ReverseProxy.Abstractions.ActivityContextHeaders result);
+                        return Enum.TryParse<Yarp.ReverseProxy.Abstractions.ActivityContextHeaders>(activityContextHeaders, ignoreCase: true, out Yarp.ReverseProxy.Abstractions.ActivityContextHeaders result);
                     }
                     return true;
                 })

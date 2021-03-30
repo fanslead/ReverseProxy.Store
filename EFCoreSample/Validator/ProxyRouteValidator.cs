@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using ReverseProxy.Store.EFCore;
+using ReverseProxy.Store.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;

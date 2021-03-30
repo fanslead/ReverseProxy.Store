@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Primitives;
-using Microsoft.ReverseProxy.Service;
+using Yarp.ReverseProxy.Service;
 
-namespace Microsoft.ReverseProxy.Store
+namespace Yarp.ReverseProxy.Store
 {
     public interface IReverseProxyStore
     {

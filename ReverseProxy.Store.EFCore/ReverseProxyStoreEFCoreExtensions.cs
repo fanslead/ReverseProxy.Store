@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.ReverseProxy.Store;
+using ReverseProxy.Store.Entity;
+using Yarp.ReverseProxy.Store;
 
 namespace ReverseProxy.Store.EFCore
 {
@@ -7,6 +8,7 @@ namespace ReverseProxy.Store.EFCore
     {
         public static IReverseProxyBuilder LoadFromEFCore(this IReverseProxyBuilder builder)
         {
+            builder.Services.AddSingleton<ICertificateConfigLoader, CertificateConfigLoader>();
             builder.Services.AddSingleton<IReverseProxyStore, EFCoreReverseProxyStore>();
             builder.LoadFromStore();
             return builder;

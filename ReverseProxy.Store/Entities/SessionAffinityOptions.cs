@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace ReverseProxy.Store.EFCore
+namespace ReverseProxy.Store.Entity
 {
     public class SessionAffinityOptions
     {
