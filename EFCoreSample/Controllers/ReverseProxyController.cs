@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ReverseProxy.Store.Entity;
+using Microsoft.Extensions.Configuration;
 
 namespace EFCoreSample.Controllers
 {
@@ -17,11 +18,22 @@ namespace EFCoreSample.Controllers
         private readonly ILogger<ReverseProxyController> _logger;
         private readonly IClusterManagement _clusterManagement;
         private readonly IProxyRouteManagement _proxyRouteManagement;
-        public ReverseProxyController(ILogger<ReverseProxyController> logger, IClusterManagement clusterManagement, IProxyRouteManagement proxyRouteManagement)
+        private readonly IConfiguration _configuration;
+        public ReverseProxyController(ILogger<ReverseProxyController> logger, IClusterManagement clusterManagement, IProxyRouteManagement proxyRouteManagement, IConfiguration configuration)
         {
             _logger = logger;
             _clusterManagement = clusterManagement;
             _proxyRouteManagement = proxyRouteManagement;
+            _configuration = configuration;
+        }
+        [HttpPost("Login")]
+        public async Task<ActionResult> Login(string password)
+        {
+            if (_configuration["Password"].Equals(password))
+            {
+                return Ok(new { Data = true });
+            }
+            return Ok(new { Data = false });
         }
         [HttpGet("Cluster")]
         public async Task<ActionResult> GetCluster()

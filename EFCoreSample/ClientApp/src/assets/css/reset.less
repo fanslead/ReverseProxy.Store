@@ -1,0 +1,97 @@
+.ivu-btn{
+  width: 76px;
+  padding: 0;
+  &:focus, &:active{
+    outline: none !important;
+    box-shadow: none !important;
+  }
+}
+.ivu-btn-primary{
+  &:hover{
+    background-color: #202cbc;
+    border-color: #202cbc;
+  }
+}
+.ivu-btn-text{
+  border: 1px solid #D9D9D9;
+  &[disabled]{
+    border-color: #D9D9D9;
+    &:hover{
+      border-color: #D9D9D9;
+    }
+  }
+  &:hover{
+    color: #000;
+    border-color: #D9D9D9;
+  }
+}
+.ivu-tree-title{
+  padding: 2px 4px;
+}
+.ivu-modal-mask{
+  background-color: rgba(0, 0, 0, 0.2);
+}
+.ivu-modal-close{
+  right: 15px;
+  top: 10px;
+}
+.ivu-modal-content{
+  background: rgba(255,255,255,1);
+  box-shadow: 0px 4px 12px 0px rgba(0,0,0,0.15);
+  border-radius: 4px;
+}
+.ivu-modal-header{
+  border-bottom: none;
+  padding: 16px 24px;
+  height: 56px;
+  .ivu-modal-header-inner, p{
+    color: rgba(0, 0, 0, .85);
+    font-weight: bold;
+    height: 24px;
+    line-height: 24px;
+  }
+}
+.ivu-modal-body{
+  padding: 0 24px;
+}
+.ivu-modal-footer{
+  padding: 16px 24px;
+  border-top: none;
+  button{
+    width: 72px;
+    height: 24px;
+    line-height: 1;
+  }
+}
+.ivu-form-item-required{
+  .ivu-form-item-label{
+    &:before{
+      margin-right: 0;
+    }
+  }
+}
+.ivu-tree-title-selected{
+  background-color: rgba(32, 44, 188, .1);
+  color: #202CBC;
+}
+.ivu-tree-title-selected, .ivu-tree-title{
+  &:hover{
+    background-color: rgba(32, 44, 188, .1);
+    color: #202CBC;
+  }
+}
+.ivu-table-small{
+  font-size: 13px;
+}
+.ivu-form{
+  .ivu-form-item-content{
+    line-height: 24px;
+    display: flex;
+  }
+  .ivu-form-item-label{
+    padding: 5px 12px 5px 0;
+  }
+  .ivu-input-wrapper, .ivu-select{
+    display: block;
+  }
+}

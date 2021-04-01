@@ -1,0 +1,68 @@
+
+│  .browserslistrc
+│  .catalog
+│  .editorconfig
+│  .eslintrc.js
+│  .gitignore
+│  babel.config.js
+│  package-lock.json
+│  package.json
+│  postcss.config.js
+│  README.md
+│  vue.config.js
+│  
+├─node_modules
+├─public // 静态资源
+│  │  favicon.ico
+│  │  index.html
+│          
+└─src
+    │  App.vue
+    │  main.js
+    │  
+    ├─api
+    │  │  config.js
+    │  │  index.js
+    │  │  
+    │  └─modules
+    │          login.js
+    │          
+    ├─assets
+    │  │  
+    │  ├─css    公用样式文件
+    │  │      common.less
+    │  │      index.js
+    │  │      index.less
+    │  │      variables.less
+    │  │      
+    │  ├─image  图片资源
+    │  │  ├─common
+    │  │  └─menu
+    │  └─js     辅助脚本
+    │          const.js
+    │          formValidate.js
+    │          utils.js
+    │          
+    ├─components    公用组件
+    │  │  
+    │  └─common
+    │          scrollView.vue
+    │          
+    ├─mixins
+    ├─router
+    │  │  index.js
+    │  │  
+    │  └─modules
+    │          merchant.js
+    │          
+    ├─store     简版vuex，用Vue.observe实现
+    │      index.js
+    │      
+    └─views     业务组件
+        │  
+        ├─common
+        │      layout.vue
+        │      
+        └─user
+                login.vue
+                
