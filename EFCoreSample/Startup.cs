@@ -54,7 +54,7 @@ namespace EFCoreSample
                  });
             services.AddReverseProxy()
                 .LoadFromEFCore()
-                .AddProxyConfigFilter<CustomConfigFilter>();
+                .AddConfigFilter<CustomConfigFilter>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "EFCoreSample", Version = "v1" });
@@ -105,8 +105,8 @@ namespace EFCoreSample
 
                         return next();
                     });
-                    proxyPipeline.UseAffinitizedDestinationLookup();
-                    proxyPipeline.UseProxyLoadBalancing();
+                    proxyPipeline.UseSessionAffinity();
+                    proxyPipeline.UseLoadBalancing();
                     proxyPipeline.UsePassiveHealthChecks();
                 })
                .ConfigureEndpoints((builder, route) => builder.WithDisplayName($"ReverseProxy {route.RouteId}-{route.ClusterId}"));

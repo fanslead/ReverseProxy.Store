@@ -152,14 +152,14 @@ namespace ReverseProxy.Store.EFCore
             return list;
         }
 
-        private static Yarp.ReverseProxy.Abstractions.ProxyMatch CreateProxyMatch(ProxyMatch match)
+        private static Yarp.ReverseProxy.Abstractions.RouteMatch CreateProxyMatch(ProxyMatch match)
         {
             if (match is null)
             {
                 return null;
             }
 
-            return new Yarp.ReverseProxy.Abstractions.ProxyMatch()
+            return new Yarp.ReverseProxy.Abstractions.RouteMatch()
             {
                 Methods = match.Methods.ReadStringArray(),
                 Hosts = match.Hosts.ReadStringArray(),
