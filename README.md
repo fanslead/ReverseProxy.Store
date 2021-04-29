@@ -17,6 +17,7 @@ using ReverseProxy.Store.EFCore;
 using ReverseProxy.Store.EFCore.Management;
 public void ConfigureServices(IServiceCollection services)
 {
+    services.AddMemoryCache();
     services.AddDbContext<EFCoreDbContext>(options =>
                     options.UseMySql(
                         Configuration.GetConnectionString("Default"),
