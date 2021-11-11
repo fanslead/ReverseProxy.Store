@@ -42,7 +42,7 @@ namespace ReverseProxy.Store.EFCore
             {
                 builder
                    .HasMany(p => p.Destinations)
-                   .WithOne()
+                   .WithOne(p => p.Cluster)
                    .OnDelete(DeleteBehavior.Cascade);
                 builder
                     .HasMany(p => p.Metadata)
