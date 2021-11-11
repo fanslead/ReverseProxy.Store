@@ -39,11 +39,20 @@ namespace EFCoreSample
             // Ìí¼ÓÑéÖ¤Æ÷
             services.AddSingleton<IValidator<Cluster>, ClusterValidator>();
             services.AddSingleton<IValidator<ProxyRoute>, ProxyRouteValidator>();
+
+            //mysql
+            //services.AddDbContext<EFCoreDbContext>(options =>
+            //        options.UseMySql(
+            //            Configuration.GetConnectionString("Default"),
+            //            ServerVersion.AutoDetect(Configuration.GetConnectionString("Default")),
+            //            b => b.MigrationsAssembly("EFCoreSample")));
+
             services.AddDbContext<EFCoreDbContext>(options =>
-                    options.UseMySql(
+                    options.UseSqlServer(
                         Configuration.GetConnectionString("Default"),
-                        ServerVersion.AutoDetect(Configuration.GetConnectionString("Default")),
                         b => b.MigrationsAssembly("EFCoreSample")));
+
+
             services.AddTransient<IClusterManagement, ClusterManagement>();
             services.AddTransient<IProxyRouteManagement, ProxyRouteManagement>();
             services.AddControllers()

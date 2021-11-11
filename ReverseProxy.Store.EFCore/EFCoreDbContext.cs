@@ -69,7 +69,7 @@ namespace ReverseProxy.Store.EFCore
                 builder
                 .HasMany(p => p.Metadata)
                 .WithOne()
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
             });
         }
         private void BuildSessionAffinityOptions(ModelBuilder modelBuilder)
@@ -78,7 +78,7 @@ namespace ReverseProxy.Store.EFCore
             {
                 builder
                 .HasOne(p => p.Cookie)
-                .WithOne()
+                .WithOne(c => c.SessionAffinityConfig)
                 .OnDelete(DeleteBehavior.Cascade);
             });
         }
@@ -86,6 +86,10 @@ namespace ReverseProxy.Store.EFCore
         {
             modelBuilder.Entity<HttpClientConfig>(builder =>
             {
+                builder
+                .HasOne(h => h.WebProxy)
+                .WithOne(w => w.HttpClientConfig)
+                .OnDelete(DeleteBehavior.Cascade);
             });
         }
         private void BuildHealthCheckOptions(ModelBuilder modelBuilder)

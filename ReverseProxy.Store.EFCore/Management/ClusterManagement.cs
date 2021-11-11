@@ -50,6 +50,11 @@ namespace ReverseProxy.Store.EFCore.Management
                 _logger.LogError($"Cluster: {id} have been use.");
                 return false;
             }
+            var des = await DbContext.Set<Destination>().Include(d => d.Metadata).Where(d => d.ClusterId == cluster.Id).ToListAsync();
+            foreach (var d in des)
+            {
+                DbContext.Set<Metadata>().RemoveRange(d.Metadata);
+            }
             DbContext.Set<Cluster>().Remove(cluster);
             var res = await DbContext.SaveChangesAsync();
             if (res > 0)

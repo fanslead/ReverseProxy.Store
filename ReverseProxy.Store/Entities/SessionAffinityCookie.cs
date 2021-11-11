@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using ReverseProxy.Store.Entity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ReverseProxy.Store.Entities
 {
-    public sealed record SessionAffinityCookie
+    public class SessionAffinityCookie
     {
         [Key]
         public int Id { get; set; }
@@ -56,6 +57,9 @@ namespace ReverseProxy.Store.Entities
         /// </summary>
         /// <remarks>Defaults to "false".</remarks>
         public bool? IsEssential { get; init; }
+
+        public int SessionAffinityConfigId { get; init; }
+        public virtual SessionAffinityConfig SessionAffinityConfig { get; init; }
 
         public bool Equals(SessionAffinityCookie? other)
         {
