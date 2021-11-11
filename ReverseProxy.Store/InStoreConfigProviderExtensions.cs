@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Yarp.ReverseProxy.Store;
-using Yarp.ReverseProxy.Service;
 using ReverseProxy.Store.Entity;
+using Yarp.ReverseProxy.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

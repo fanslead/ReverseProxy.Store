@@ -76,7 +76,7 @@ namespace ReverseProxy.Store.EFCore.Management
             var dbCluster = await DbContext.Set<Cluster>()
                    .Include(c => c.Metadata)
                    .Include(c => c.Destinations)
-                   .Include(c => c.SessionAffinity).ThenInclude(s => s.Settings)
+                   .Include(c => c.SessionAffinity).ThenInclude(s => s.Cookie)
                    .Include(c => c.HttpRequest)
                    .Include(c => c.HttpClient)
                    .Include(c => c.HealthCheck).ThenInclude(h => h.Active)

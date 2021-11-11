@@ -9,13 +9,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Yarp.ReverseProxy.Middleware;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ReverseProxy.Store.EFCore;
 using ReverseProxy.Store.EFCore.Management;
 using VueCliMiddleware;
 using ReverseProxy.Store.Entity;
+using Yarp.ReverseProxy.Model;
 
 namespace EFCoreSample
 {
@@ -54,7 +54,7 @@ namespace EFCoreSample
                  });
             services.AddReverseProxy()
                 .LoadFromEFCore()
-                .AddConfigFilter<CustomConfigFilter>();
+                ;
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "EFCoreSample", Version = "v1" });

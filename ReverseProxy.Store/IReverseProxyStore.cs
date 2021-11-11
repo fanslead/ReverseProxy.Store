@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Primitives;
-using Yarp.ReverseProxy.Service;
+using Yarp.ReverseProxy.Configuration;
 
 namespace Yarp.ReverseProxy.Store
 {

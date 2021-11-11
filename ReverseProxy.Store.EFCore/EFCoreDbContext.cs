@@ -17,11 +17,11 @@ namespace ReverseProxy.Store.EFCore
         public DbSet<HealthCheckOptions> HealthCheckOptions { get; set; }
         public DbSet<Metadata> Metadatas { get; set; }
         public DbSet<PassiveHealthCheckOptions> PassiveHealthCheckOptions { get; set; }
-        public DbSet<ProxyHttpClientOptions> ProxyHttpClientOptions { get; set; }
+        public DbSet<HttpClientConfig> ProxyHttpClientOptions { get; set; }
         public DbSet<ProxyMatch> ProxyMatches { get; set; }
-        public DbSet<RequestProxyOptions> RequestProxyOptions { get; set; }
+        public DbSet<ForwarderRequest> RequestProxyOptions { get; set; }
         public DbSet<RouteHeader> RouteHeaders { get; set; }
-        public DbSet<SessionAffinityOptions> SessionAffinityOptions { get; set; }
+        public DbSet<SessionAffinityConfig> SessionAffinityOptions { get; set; }
         public DbSet<SessionAffinityOptionSetting> SessionAffinityOptionSettings { get; set; }
         public DbSet<Transform> Transforms { get; set; }
 
@@ -74,22 +74,18 @@ namespace ReverseProxy.Store.EFCore
         }
         private void BuildSessionAffinityOptions(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<SessionAffinityOptions>(builder =>
+            modelBuilder.Entity<SessionAffinityConfig>(builder =>
             {
                 builder
-                .HasMany(p => p.Settings)
+                .HasOne(p => p.Cookie)
                 .WithOne()
                 .OnDelete(DeleteBehavior.Cascade);
             });
         }
         private void BuildProxyHttpClientOptions(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ProxyHttpClientOptions>(builder =>
+            modelBuilder.Entity<HttpClientConfig>(builder =>
             {
-                builder
-                .HasOne(p => p.ClientCertificate)
-                .WithOne(s => s.ProxyHttpClientOptions)
-                .OnDelete(DeleteBehavior.Cascade);
             });
         }
         private void BuildHealthCheckOptions(ModelBuilder modelBuilder)

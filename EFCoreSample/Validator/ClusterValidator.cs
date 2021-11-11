@@ -71,19 +71,7 @@ namespace EFCoreSample.Validator
                 .When(x => x.HttpClient != null)
                 .WithMessage("Cluster.HttpClient.SslProtocols Must in None|Ssl2|Ssl3|Default|Tls|Tls11|Tls12|Tls13");
                 ;
-            RuleFor(x => x.HttpClient.ActivityContextHeaders)
-                .Must(activityContextHeaders =>
-                {
-                    if (!string.IsNullOrWhiteSpace(activityContextHeaders))
-                    {
-                        return Enum.TryParse<Yarp.ReverseProxy.Abstractions.ActivityContextHeaders>(activityContextHeaders, ignoreCase: true, out Yarp.ReverseProxy.Abstractions.ActivityContextHeaders result);
-                    }
-                    return true;
-                })
-                .When(x => x.HttpClient != null)
-                .WithMessage("Cluster.HttpClient.ActivityContextHeaders Must in None|Baggage|CorrelationContext|BaggageAndCorrelationContext");
-                ;
-            RuleFor(x => x.HttpRequest.Timeout)
+            RuleFor(x => x.HttpRequest.ActivityTimeout)
                 .Must(timeout =>
                 {
                     if (!string.IsNullOrWhiteSpace(timeout))

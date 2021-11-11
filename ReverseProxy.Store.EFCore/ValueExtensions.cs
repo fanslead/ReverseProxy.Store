@@ -35,7 +35,7 @@ namespace ReverseProxy.Store.EFCore
                 return null;
             else
             {
-                return TimeSpan.Parse(value, CultureInfo.InvariantCulture);
+                return TimeSpan.ParseExact(value, "c", CultureInfo.InvariantCulture);
             }
         }
 

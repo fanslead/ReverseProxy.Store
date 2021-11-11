@@ -1,6 +1,6 @@
-﻿using Yarp.ReverseProxy.Abstractions;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Yarp.ReverseProxy.Configuration;
 
 namespace ReverseProxy.Store.Entity
 {

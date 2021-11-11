@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
-using Yarp.ReverseProxy.Service;
 using Yarp.ReverseProxy.Store;
 using System;
 using System.Collections.Generic;
@@ -12,6 +11,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using ReverseProxy.Store.Entity;
+using Yarp.ReverseProxy.Configuration;
 
 namespace ReverseProxy.Store.EFCore
 {
@@ -20,13 +20,11 @@ namespace ReverseProxy.Store.EFCore
         private EFCoreReloadToken _reloadToken = new EFCoreReloadToken();
         private IServiceProvider _sp;
         private IMemoryCache _cache;
-        private readonly ICertificateConfigLoader _certificateConfigLoader;
 
-        public EFCoreReverseProxyStore(IServiceProvider sp, IMemoryCache cache, ICertificateConfigLoader certificateConfigLoader)
+        public EFCoreReverseProxyStore(IServiceProvider sp, IMemoryCache cache)
         {
             _sp = sp;
             _cache = cache;
-            _certificateConfigLoader = certificateConfigLoader;
         }
 
         // Used by tests
@@ -81,7 +79,7 @@ namespace ReverseProxy.Store.EFCore
             var clusters = DbContext.Set<Cluster>()
                 .Include(c => c.Metadata)
                 .Include(c => c.Destinations)
-                .Include(c => c.SessionAffinity).ThenInclude(s => s.Settings)
+                .Include(c => c.SessionAffinity).ThenInclude(s => s.Cookie)
                 .Include(c => c.HttpRequest)
                 .Include(c => c.HttpClient)
                 .Include(c => c.HealthCheck).ThenInclude(h => h.Active)
@@ -101,30 +99,34 @@ namespace ReverseProxy.Store.EFCore
         }
 
 
-        private Yarp.ReverseProxy.Abstractions.Cluster CreateCluster(Cluster cluster)
+        private Yarp.ReverseProxy.Configuration.ClusterConfig CreateCluster(Cluster cluster)
         {
-            var destinations = new Dictionary<string, Yarp.ReverseProxy.Abstractions.Destination>(StringComparer.OrdinalIgnoreCase);
+            var destinations = new Dictionary<string, Yarp.ReverseProxy.Configuration.DestinationConfig>(StringComparer.OrdinalIgnoreCase);
             foreach (var destination in cluster.Destinations)
             {
                 destinations.Add(destination.Name, CreateDestination(destination));
             }
 
-            return new Yarp.ReverseProxy.Abstractions.Cluster
+            return new Yarp.ReverseProxy.Configuration.ClusterConfig
             {
-                Id = cluster.Id,
+                ClusterId = cluster.Id,
                 LoadBalancingPolicy = cluster.LoadBalancingPolicy,
                 SessionAffinity = CreateSessionAffinityOptions(cluster.SessionAffinity),
                 HealthCheck = CreateHealthCheckOptions(cluster.HealthCheck),
-                HttpClient = CreateProxyHttpClientOptions(cluster.HttpClient),
-                HttpRequest = CreateProxyRequestOptions(cluster.HttpRequest),
+                HttpClient = CreateHttpClientConfig(cluster.HttpClient),
+                HttpRequest = CreateProxyRequestConfig(cluster.HttpRequest),
                 Metadata = cluster.Metadata.ReadStringDictionary(),
                 Destinations = destinations,
             };
         }
 
-        private static Yarp.ReverseProxy.Abstractions.ProxyRoute CreateRoute(ProxyRoute proxyRoute)
+        private static Yarp.ReverseProxy.Configuration.RouteConfig CreateRoute(ProxyRoute proxyRoute)
         {
-            return new Yarp.ReverseProxy.Abstractions.ProxyRoute
+            if (!string.IsNullOrEmpty(proxyRoute.RouteId))
+            {
+                throw new Exception("The route config format has changed, routes are now objects instead of an array. The route id must be set as the object name, not with the 'RouteId' field.");
+            }
+            return new Yarp.ReverseProxy.Configuration.RouteConfig
             {
                 RouteId = proxyRoute.RouteId,
                 Order = proxyRoute.Order,
@@ -152,23 +154,24 @@ namespace ReverseProxy.Store.EFCore
             return list;
         }
 
-        private static Yarp.ReverseProxy.Abstractions.RouteMatch CreateProxyMatch(ProxyMatch match)
+        private static Yarp.ReverseProxy.Configuration.RouteMatch CreateProxyMatch(ProxyMatch match)
         {
             if (match is null)
             {
                 return null;
             }
 
-            return new Yarp.ReverseProxy.Abstractions.RouteMatch()
+            return new Yarp.ReverseProxy.Configuration.RouteMatch()
             {
                 Methods = match.Methods.ReadStringArray(),
                 Hosts = match.Hosts.ReadStringArray(),
                 Path = match.Path,
                 Headers = CreateRouteHeaders(match.Headers),
+                QueryParameters = CreateRouteQueryParameters(match.QueryParameters)
             };
         }
 
-        private static IReadOnlyList<Yarp.ReverseProxy.Abstractions.RouteHeader> CreateRouteHeaders(List<RouteHeader> routeHeaders)
+        private static IReadOnlyList<Yarp.ReverseProxy.Configuration.RouteHeader>? CreateRouteHeaders(List<Entity.RouteHeader> routeHeaders)
         {
             if (routeHeaders is null || routeHeaders.Count == 0)
             {
@@ -178,9 +181,9 @@ namespace ReverseProxy.Store.EFCore
             return routeHeaders.Select(data => CreateRouteHeader(data)).ToArray();
         }
 
-        private static Yarp.ReverseProxy.Abstractions.RouteHeader CreateRouteHeader(RouteHeader routeHeader)
+        private static Yarp.ReverseProxy.Configuration.RouteHeader CreateRouteHeader(Entity.RouteHeader routeHeader)
         {
-            return new Yarp.ReverseProxy.Abstractions.RouteHeader()
+            return new Yarp.ReverseProxy.Configuration.RouteHeader()
             {
                 Name = routeHeader.Name,
                 Values = routeHeader.Values.ReadStringArray(),
@@ -189,61 +192,102 @@ namespace ReverseProxy.Store.EFCore
             };
         }
 
-        private static Yarp.ReverseProxy.Abstractions.SessionAffinityOptions CreateSessionAffinityOptions(SessionAffinityOptions sessionAffinityOptions)
+        private static IReadOnlyList<RouteQueryParameter>? CreateRouteQueryParameters(IReadOnlyList<Entities.RouteQueryParameter> routeQueryParameters)
+        {
+            if (routeQueryParameters is null)
+            {
+                return null;
+            }
+
+            return routeQueryParameters.Select(data => CreateRouteQueryParameter(data)).ToArray();
+        }
+
+        private static RouteQueryParameter CreateRouteQueryParameter(Entities.RouteQueryParameter routeQueryParameter)
+        {
+            return new RouteQueryParameter()
+            {
+                Name = routeQueryParameter.Name,
+                Values = routeQueryParameter.Values.ReadStringArray(),
+                Mode = routeQueryParameter.Mode,
+                IsCaseSensitive = routeQueryParameter.IsCaseSensitive,
+            };
+        }
+        private static Yarp.ReverseProxy.Configuration.SessionAffinityConfig? CreateSessionAffinityOptions(Entity.SessionAffinityConfig sessionAffinityOptions)
         {
             if (sessionAffinityOptions is null)
             {
                 return null;
             }
 
-            return new Yarp.ReverseProxy.Abstractions.SessionAffinityOptions
+            return new Yarp.ReverseProxy.Configuration.SessionAffinityConfig
             {
-                Enabled = sessionAffinityOptions.Enabled ?? false,
-                Mode = sessionAffinityOptions.Mode,
+                Policy = sessionAffinityOptions.Policy,
                 FailurePolicy = sessionAffinityOptions.FailurePolicy,
-                Settings = sessionAffinityOptions.Settings.ReadStringDictionary()
+                AffinityKeyName = sessionAffinityOptions.AffinityKeyName,
+                Enabled = sessionAffinityOptions.Enabled ?? false,
+                Cookie = CreateSessionAffinityCookieConfig(sessionAffinityOptions.Cookie)
             };
         }
 
-        private static Yarp.ReverseProxy.Abstractions.HealthCheckOptions CreateHealthCheckOptions(HealthCheckOptions healthCheckOptions)
+        private static Yarp.ReverseProxy.Configuration.SessionAffinityCookieConfig? CreateSessionAffinityCookieConfig(Entities.SessionAffinityCookie sessionAffinityCookie)
+        {
+            if (sessionAffinityCookie is null)
+            {
+                return null;
+            }
+
+            return new SessionAffinityCookieConfig
+            {
+                Path = sessionAffinityCookie.Path,
+                SameSite = sessionAffinityCookie.SameSite,
+                HttpOnly = sessionAffinityCookie.HttpOnly,
+                MaxAge = sessionAffinityCookie.MaxAge.ReadTimeSpan(),
+                Domain = sessionAffinityCookie.Domain,
+                IsEssential = sessionAffinityCookie.IsEssential,
+                SecurePolicy = sessionAffinityCookie.SecurePolicy,
+                Expiration = sessionAffinityCookie.Expiration.ReadTimeSpan()
+            };
+        }
+        private static Yarp.ReverseProxy.Configuration.HealthCheckConfig? CreateHealthCheckOptions(HealthCheckOptions healthCheckOptions)
         {
             if (healthCheckOptions is null)
             {
                 return null;
             }
 
-            return new Yarp.ReverseProxy.Abstractions.HealthCheckOptions
+            return new Yarp.ReverseProxy.Configuration.HealthCheckConfig
             {
                 Passive = CreatePassiveHealthCheckOptions(healthCheckOptions.Passive),
-                Active = CreateActiveHealthCheckOptions(healthCheckOptions.Active)
+                Active = CreateActiveHealthCheckOptions(healthCheckOptions.Active),
+                AvailableDestinationsPolicy = healthCheckOptions.AvailableDestinationsPolicy
             };
         }
 
-        private static Yarp.ReverseProxy.Abstractions.PassiveHealthCheckOptions CreatePassiveHealthCheckOptions(PassiveHealthCheckOptions passiveHealthCheckOptions)
+        private static Yarp.ReverseProxy.Configuration.PassiveHealthCheckConfig? CreatePassiveHealthCheckOptions(PassiveHealthCheckOptions passiveHealthCheckOptions)
         {
             if (passiveHealthCheckOptions is null)
             {
                 return null;
             }
 
-            return new Yarp.ReverseProxy.Abstractions.PassiveHealthCheckOptions
+            return new Yarp.ReverseProxy.Configuration.PassiveHealthCheckConfig
             {
-                Enabled = passiveHealthCheckOptions.Enabled ?? false,
+                Enabled = passiveHealthCheckOptions.Enabled,
                 Policy = passiveHealthCheckOptions.Policy,
                 ReactivationPeriod = passiveHealthCheckOptions.ReactivationPeriod.ReadTimeSpan()
             };
         }
 
-        private static Yarp.ReverseProxy.Abstractions.ActiveHealthCheckOptions CreateActiveHealthCheckOptions(ActiveHealthCheckOptions activeHealthCheckOptions)
+        private static Yarp.ReverseProxy.Configuration.ActiveHealthCheckConfig? CreateActiveHealthCheckOptions(ActiveHealthCheckOptions activeHealthCheckOptions)
         {
             if (activeHealthCheckOptions is null)
             {
                 return null;
             }
 
-            return new Yarp.ReverseProxy.Abstractions.ActiveHealthCheckOptions
+            return new Yarp.ReverseProxy.Configuration.ActiveHealthCheckConfig
             {
-                Enabled = activeHealthCheckOptions.Enabled ?? false,
+                Enabled = activeHealthCheckOptions.Enabled,
                 Interval = activeHealthCheckOptions.Interval.ReadTimeSpan(),
                 Timeout = activeHealthCheckOptions.Timeout.ReadTimeSpan(),
                 Policy = activeHealthCheckOptions.Policy,
@@ -251,25 +295,11 @@ namespace ReverseProxy.Store.EFCore
             };
         }
 
-        private Yarp.ReverseProxy.Abstractions.ProxyHttpClientOptions CreateProxyHttpClientOptions(ProxyHttpClientOptions proxyHttpClientOptions)
+        private static Yarp.ReverseProxy.Configuration.HttpClientConfig? CreateHttpClientConfig(Entity.HttpClientConfig proxyHttpClientOptions)
         {
             if (proxyHttpClientOptions is null)
             {
                 return null;
-            }
-
-            //var certSection = proxyHttpClientOptions.ClientCertificate;
-
-            X509Certificate2 clientCertificate = null;
-
-            if (proxyHttpClientOptions.ClientCertificate != null)
-            {
-                clientCertificate = _certificateConfigLoader.LoadCertificate(proxyHttpClientOptions.ClientCertificate);
-            }
-
-            if (clientCertificate != null)
-            {
-                Certificates.AddLast(new WeakReference<X509Certificate2>(clientCertificate));
             }
 
             SslProtocols? sslProtocols = null;
@@ -286,44 +316,60 @@ namespace ReverseProxy.Store.EFCore
                 sslProtocols = SslProtocols.None;
             }
 
-            return new Yarp.ReverseProxy.Abstractions.ProxyHttpClientOptions
+            WebProxyConfig? webProxy;
+            var webProxySection = proxyHttpClientOptions.WebProxy;
+            if (webProxySection != null)
+            {
+                webProxy = new WebProxyConfig()
+                {
+                    Address = string.IsNullOrWhiteSpace(webProxySection.Address) ? null : new Uri(webProxySection.Address) ,
+                    BypassOnLocal = webProxySection.BypassOnLocal,
+                    UseDefaultCredentials = webProxySection.UseDefaultCredentials
+                };
+            }
+            else
+            {
+                webProxy = null;
+            }
+            return new Yarp.ReverseProxy.Configuration.HttpClientConfig
             {
                 SslProtocols = sslProtocols,
                 DangerousAcceptAnyServerCertificate = proxyHttpClientOptions.DangerousAcceptAnyServerCertificate,
-                ClientCertificate = clientCertificate,
                 MaxConnectionsPerServer = proxyHttpClientOptions.MaxConnectionsPerServer,
 #if NET
                 EnableMultipleHttp2Connections = proxyHttpClientOptions.EnableMultipleHttp2Connections,
+                RequestHeaderEncoding = proxyHttpClientOptions.RequestHeaderEncoding,
 #endif
-                ActivityContextHeaders = proxyHttpClientOptions.ActivityContextHeaders.ReadEnum<Yarp.ReverseProxy.Abstractions.ActivityContextHeaders>()
+                WebProxy = webProxy
             };
         }
 
-        private static Yarp.ReverseProxy.Service.Proxy.RequestProxyOptions CreateProxyRequestOptions(RequestProxyOptions requestProxyOptions)
+        private static Yarp.ReverseProxy.Forwarder.ForwarderRequestConfig? CreateProxyRequestConfig(ForwarderRequest requestProxyOptions)
         {
             if (requestProxyOptions is null)
             {
                 return null;
             }
 
-            return new Yarp.ReverseProxy.Service.Proxy.RequestProxyOptions
+            return new Yarp.ReverseProxy.Forwarder.ForwarderRequestConfig
             {
-                Timeout = requestProxyOptions.Timeout.ReadTimeSpan(),
+                ActivityTimeout = requestProxyOptions.ActivityTimeout.ReadTimeSpan(),
                 Version = requestProxyOptions.Version.ReadVersion(),
 #if NET
                 VersionPolicy = requestProxyOptions.VersionPolicy.ReadEnum<HttpVersionPolicy>(),
 #endif
+                AllowResponseBuffering = requestProxyOptions.AllowResponseBuffering
             };
         }
 
-        private static Yarp.ReverseProxy.Abstractions.Destination CreateDestination(Destination destination)
+        private static Yarp.ReverseProxy.Configuration.DestinationConfig CreateDestination(Destination destination)
         {
             if (destination is null)
             {
                 return null;
             }
 
-            return new Yarp.ReverseProxy.Abstractions.Destination
+            return new Yarp.ReverseProxy.Configuration.DestinationConfig
             {
                 Address = destination.Address,
                 Health = destination.Health,

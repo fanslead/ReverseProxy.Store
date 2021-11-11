@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ReverseProxy.Store.Entities;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace ReverseProxy.Store.Entity
@@ -21,6 +22,11 @@ namespace ReverseProxy.Store.Entity
         /// Only match requests with the given Path pattern.
         /// </summary>
         public string Path { get; set; }
+
+        /// <summary>
+        /// Only match requests that contain all of these query parameters.
+        /// </summary>
+        public List<RouteQueryParameter> QueryParameters { get; set; }
 
         public virtual List<RouteHeader> Headers { get; set; }
 

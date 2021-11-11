@@ -31,6 +31,6 @@ namespace ReverseProxy.Store.Entity
 
         public int ProxyHttpClientOptionsId { get; set; }
 
-        public virtual ProxyHttpClientOptions ProxyHttpClientOptions { get; set; }
+        public virtual HttpClientConfig ProxyHttpClientOptions { get; set; }
     }
 }

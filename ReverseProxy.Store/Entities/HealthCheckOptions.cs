@@ -16,6 +16,11 @@ namespace ReverseProxy.Store.Entity
         /// Active health check options.
         /// </summary>
         public virtual ActiveHealthCheckOptions Active { get; init; }
+        /// <summary>
+        /// Available destinations policy.
+        /// </summary>
+        public string? AvailableDestinationsPolicy { get; init; }
+
         public string ClusterId { get; set; }
         public virtual Cluster Cluster { get; set; }
     }

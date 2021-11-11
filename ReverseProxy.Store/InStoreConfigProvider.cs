@@ -1,10 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
-using Yarp.ReverseProxy.Service;
 using ReverseProxy.Store;
 using System;
 using System.Threading;
 using ReverseProxy.Store.Entity;
+using Yarp.ReverseProxy.Configuration;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Yarp.ReverseProxy.Store
 {
@@ -45,6 +46,7 @@ namespace Yarp.ReverseProxy.Store
             return _config;
         }
 
+        [MemberNotNull(nameof(_config))]
         private void UpdateConfig()
         {
             // Prevent overlapping updates, especially on startup.

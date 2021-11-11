@@ -8,7 +8,6 @@ namespace ReverseProxy.Store.EFCore
     {
         public static IReverseProxyBuilder LoadFromEFCore(this IReverseProxyBuilder builder)
         {
-            builder.Services.AddSingleton<ICertificateConfigLoader, CertificateConfigLoader>();
             builder.Services.AddSingleton<IReverseProxyStore, EFCoreReverseProxyStore>();
             builder.LoadFromStore();
             return builder;

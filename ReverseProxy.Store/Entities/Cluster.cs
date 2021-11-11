@@ -19,7 +19,7 @@ namespace ReverseProxy.Store.Entity
         /// <summary>
         /// Session affinity options.
         /// </summary>
-        public virtual SessionAffinityOptions SessionAffinity { get; set; }
+        public virtual SessionAffinityConfig SessionAffinity { get; set; }
 
         /// <summary>
         /// Health checking options.
@@ -29,12 +29,12 @@ namespace ReverseProxy.Store.Entity
         /// <summary>
         /// Options of an HTTP client that is used to call this cluster.
         /// </summary>
-        public virtual ProxyHttpClientOptions HttpClient { get; set; }
+        public virtual HttpClientConfig HttpClient { get; set; }
 
         /// <summary>
         /// Options of an outgoing HTTP request.
         /// </summary>
-        public virtual RequestProxyOptions HttpRequest { get; set; }
+        public virtual ForwarderRequest HttpRequest { get; set; }
 
         /// <summary>
         /// The set of destinations associated with this cluster.
