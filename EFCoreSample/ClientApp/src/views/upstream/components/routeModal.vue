@@ -300,6 +300,18 @@ export default {
                   });
 
                 }
+                if (!(value && value.queryParameters && value.queryParameters.length)) {
+                  value.queryParameters = [];
+                  value.queryParameters.push({
+                    // id: 0,
+                    name: "",
+                    values: "",
+                    mode: null,
+                    isCaseSensitive: false
+                    // proxyMatchId: 0
+                  });
+
+                }
               }
               this.formData[key] = value;
             }
