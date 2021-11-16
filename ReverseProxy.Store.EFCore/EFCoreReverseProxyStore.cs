@@ -122,7 +122,7 @@ namespace ReverseProxy.Store.EFCore
 
         private static Yarp.ReverseProxy.Configuration.RouteConfig CreateRoute(ProxyRoute proxyRoute)
         {
-            if (!string.IsNullOrEmpty(proxyRoute.RouteId))
+            if (string.IsNullOrEmpty(proxyRoute.RouteId))
             {
                 throw new Exception("The route config format has changed, routes are now objects instead of an array. The route id must be set as the object name, not with the 'RouteId' field.");
             }
