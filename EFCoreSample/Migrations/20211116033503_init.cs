@@ -374,7 +374,7 @@ namespace EFCoreSample.Migrations
                     Values = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Mode = table.Column<int>(type: "int", nullable: false),
                     IsCaseSensitive = table.Column<bool>(type: "bit", nullable: false),
-                    ProxyMatchId = table.Column<int>(type: "int", nullable: true)
+                    ProxyMatchId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -383,7 +383,8 @@ namespace EFCoreSample.Migrations
                         name: "FK_RouteQueryParameter_ProxyMatches_ProxyMatchId",
                         column: x => x.ProxyMatchId,
                         principalTable: "ProxyMatches",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(

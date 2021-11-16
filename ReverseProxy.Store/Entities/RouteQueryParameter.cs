@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReverseProxy.Store.Entity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -37,5 +38,7 @@ namespace ReverseProxy.Store.Entities
         /// Defaults to <c>false</c>.
         /// </summary>
         public bool IsCaseSensitive { get; init; }
+        public int ProxyMatchId { get; set; }
+        public virtual ProxyMatch ProxyMatch { get; set; }
     }
 }

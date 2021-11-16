@@ -12,7 +12,7 @@ using ReverseProxy.Store.EFCore;
 namespace EFCoreSample.Migrations
 {
     [DbContext(typeof(EFCoreDbContext))]
-    [Migration("20211111035743_init")]
+    [Migration("20211116033503_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -41,7 +41,7 @@ namespace EFCoreSample.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ProxyMatchId")
+                    b.Property<int>("ProxyMatchId")
                         .HasColumnType("int");
 
                     b.Property<string>("Values")
@@ -519,9 +519,13 @@ namespace EFCoreSample.Migrations
 
             modelBuilder.Entity("ReverseProxy.Store.Entities.RouteQueryParameter", b =>
                 {
-                    b.HasOne("ReverseProxy.Store.Entity.ProxyMatch", null)
+                    b.HasOne("ReverseProxy.Store.Entity.ProxyMatch", "ProxyMatch")
                         .WithMany("QueryParameters")
-                        .HasForeignKey("ProxyMatchId");
+                        .HasForeignKey("ProxyMatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProxyMatch");
                 });
 
             modelBuilder.Entity("ReverseProxy.Store.Entities.SessionAffinityCookie", b =>
@@ -559,10 +563,12 @@ namespace EFCoreSample.Migrations
 
             modelBuilder.Entity("ReverseProxy.Store.Entity.Destination", b =>
                 {
-                    b.HasOne("ReverseProxy.Store.Entity.Cluster", null)
+                    b.HasOne("ReverseProxy.Store.Entity.Cluster", "Cluster")
                         .WithMany("Destinations")
                         .HasForeignKey("ClusterId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Cluster");
                 });
 
             modelBuilder.Entity("ReverseProxy.Store.Entity.ForwarderRequest", b =>

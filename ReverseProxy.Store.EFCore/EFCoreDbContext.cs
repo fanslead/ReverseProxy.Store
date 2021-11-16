@@ -132,6 +132,10 @@ namespace ReverseProxy.Store.EFCore
                 .HasMany(p => p.Headers)
                 .WithOne(h => h.ProxyMatch)
                 .OnDelete(DeleteBehavior.Cascade);
+                builder
+                .HasMany(p => p.QueryParameters)
+                .WithOne(q => q.ProxyMatch)
+                .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
