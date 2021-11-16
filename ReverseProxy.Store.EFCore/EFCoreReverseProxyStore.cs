@@ -147,9 +147,22 @@ namespace ReverseProxy.Store.EFCore
             }
             var groupTransforms = transforms.GroupBy(t => t.Type);
             var list = new List<IReadOnlyDictionary<string, string>>();
-            foreach (var item in groupTransforms)
+            foreach (var group in groupTransforms)
             {
-                list.Add(item.ToDictionary(d => d.Key, d => d.Value, StringComparer.OrdinalIgnoreCase));
+                var key = group.Key.ToString();
+                Dictionary<string, string> dir = new Dictionary<string, string>();
+                foreach (var transform in group)
+                {
+                    if(transform.Key == key)
+                    {
+                        if(dir.Count != 0)
+                            list.Add(dir);
+                        dir = new Dictionary<string, string>();
+                    }
+                    dir.Add(transform.Key, transform.Value);
+                }
+                if (dir.Count != 0)
+                    list.Add(dir);
             }
             return list;
         }
