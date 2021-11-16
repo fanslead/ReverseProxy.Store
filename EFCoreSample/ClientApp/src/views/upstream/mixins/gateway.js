@@ -334,6 +334,17 @@ export default {
       HTTPMethods: ["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"], // http请求方法
       loadBPList: ["RoundRobin", "Random", "LeastRequests", "PowerOfTwoChoices"], // 目的地算法类型
       failurePolicyList: ["Redistribute", "Return503"], // 失败策略
+      securePolicyList: [
+        { value : 0, name :"SameAsRequest"},
+        { value: 1, name: "Always"},
+        {value: 2, name: "None"}
+      ],
+      sameSiteModeList: [
+        { value : -1, name :"Unspecified"},
+        { value : 0, name :"None"},
+        { value: 1, name: "Lax"},
+        {value: 2, name: "Strict"}
+      ],
       versionPolicyType: ["RequestVersionOrLower", "RequestVersionOrHigher", "RequestVersionExact"], // 外发请求选择最终版本,枚举值是0,1,2
       sslProtocols: ["Default", "None", "Ssl2", "Ssl3", "Tls", "Tls11", "Tls12", "Tls13"],
       sslProtocolList: [

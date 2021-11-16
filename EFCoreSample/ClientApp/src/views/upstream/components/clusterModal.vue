@@ -50,7 +50,7 @@
         <Form ref="httpRequestForm" :model="formData.httpRequest" class="i-form self" :label-width="180" :rules="httpValidate" onsubmit="return false">
           <Row type="flex">
             <FormItem label="超时[Timeout]" :label-width="180" prop="timeout">
-              <TimePicker type="time" placement="top" v-model.trim="formData.httpRequest.timeout" placeholder="请选择" :editable="false"></TimePicker>
+              <TimePicker type="time" placement="top" v-model.trim="formData.httpRequest.activityTimeout" placeholder="请选择" :editable="false"></TimePicker>
             </FormItem>
             <FormItem label="版本[Version]" :label-width="170" prop="version">
               <Input v-model.trim="formData.httpRequest.version" placeholder="请输入" />
@@ -59,6 +59,9 @@
               <Select v-model="formData.httpRequest.versionPolicy" placeholder="请选择" transfer style="width:200px;" clearable>
                 <Option v-for="(type, index) in versionPolicyType" :key="index" :value="type">{{type}}</Option>
               </Select>
+            </FormItem>
+            <FormItem label="" :label-width="55">
+              <Checkbox v-model="formData.httpRequest.allowResponseBuffering">客户端是否AllowResponseBuffering</Checkbox>
             </FormItem>
           </Row>
         </Form>
@@ -87,16 +90,8 @@
             </FormItem>
           </Row>
           <Row type="flex">
-            <div style="margin-left:40px;height:24px;" class="flex col-center">
-              <span>活动关联标头</span>
-              <Poptip width="250" :word-wrap="true" :content="tipContent.Header" style="margin: 0 4px;">
-                <Icon type="ios-information-circle" color="#202cbc" size="18" />
-              </Poptip>
-            </div>
-            <FormItem label="" :label-width="1">
-              <Select v-model="formData.httpClient.activityContextHeaders" placeholder="请选择活动关联标头" transfer clearable>
-                <Option v-for="(item, index) in activityHeaderList" :key="index" :value="item.Name">{{item.Name}}</Option>
-              </Select>
+            <FormItem label="RequestHeaderEncoding" prop="requestHeaderEncoding" key="requestHeaderEncoding">
+              <Input v-model.trim="formData.httpClient.requestHeaderEncoding" placeholder="请输入RequestHeaderEncoding" />
             </FormItem>
             <FormItem label="" :label-width="55">
               <Checkbox v-model="formData.httpClient.enableMultipleHttp2Connections">是否建立HTTP/2连接</Checkbox>
@@ -105,39 +100,27 @@
               </Poptip>
             </FormItem>
           </Row>
-          <Row type="flex" v-if="formData.httpClient.clientCertificate">
+          <Row type="flex" v-if="formData.httpClient.webProxy">
             <div class="module-title flex col-center" style="margin-left:40px;">
               <div class="label"></div>
-              <span>证书配置<span class="tips">[ClientCertificate]</span></span>
+              <span>WebProxy<span class="tips">[WebProxy]</span></span>
+              <i-switch v-model="formData.httpClient.webProxy.enabled" style="margin-left: 10px;" />
             </div>
-            <Row type="flex" class="flex-col">
-              <div class="child-title">证书格式：1.PFX文件和可选密码；2.PEM文件、Key和可选密钥；3.证书主题、存储和位置，以及AllowInvalid标志。</div>
-            </Row>
-            <Row type="flex" class="flex-col">
-              <Row type="flex">
-                <FormItem label="路径[Path]" :label-width="150">
-                  <Input v-model.trim="formData.httpClient.clientCertificate.path" placeholder="请输入" type="text" clearable />
-                </FormItem>
-                <FormItem label="Key路径[KeyPath]" :label-width="150">
-                  <Input v-model.trim="formData.httpClient.clientCertificate.keyPath" placeholder="请输入" type="text" clearable />
-                </FormItem>
-                <FormItem label="密钥[Password]" :label-width="150">
-                  <Input v-model.trim="formData.httpClient.clientCertificate.password" placeholder="请输入" type="text" clearable />
-                </FormItem>
-                <FormItem label="主题[Subject]" :label-width="150">
-                  <Input v-model.trim="formData.httpClient.clientCertificate.subject" placeholder="请输入" type="text" clearable />
-                </FormItem>
-                <FormItem label="存储[Store]" :label-width="150">
-                  <Input v-model.trim="formData.httpClient.clientCertificate.store" placeholder="请输入" type="text" clearable />
-                </FormItem>
-                <FormItem label="位置[Location]" :label-width="150">
-                  <Input v-model.trim="formData.httpClient.clientCertificate.location" placeholder="请输入" type="text" clearable />
-                </FormItem>
-                <FormItem label="" :label-width="70">
-                  <Checkbox v-model="formData.httpClient.clientCertificate.allowInvalid">是否接受一个无效的证书</Checkbox>
-                </FormItem>
+            <div class="module-content" v-if="formData.httpClient.webProxy.enabled">
+              <Row type="flex" class="flex-col">
+                <Row type="flex">
+                  <FormItem label="Address[Address]" :label-width="200">
+                    <Input v-model.trim="formData.httpClient.webProxy.address" placeholder="请输入" type="text" clearable />
+                  </FormItem>
+                  <FormItem prop="bypassOnLocal" key="bypassOnLocal" >
+                    <Checkbox v-model="formData.httpClient.webProxy.bypassOnLocal">是否BypassOnLocal</Checkbox>
+                  </FormItem>
+                  <FormItem prop="useDefaultCredentials" key="useDefaultCredentials" >
+                    <Checkbox v-model="formData.httpClient.webProxy.UseDefaultCredentials">是否UseDefaultCredentials</Checkbox>
+                  </FormItem>
+                </Row>
               </Row>
-            </Row>
+            </div>
           </Row>
         </Form>
       </div>
@@ -151,8 +134,11 @@
         <div class="module-content" v-if="formData.sessionAffinity.enabled">
           <Form ref="sessionForm" :model="formData.sessionAffinity" class="i-form self" :label-width="180" :rules="sessionValidate" onsubmit="return false">
             <Row type="flex">
-              <FormItem label="模式[Mode]" prop="mode" key="mode">
-                <Input v-model.trim="formData.sessionAffinity.mode" placeholder="请输入模式" />
+              <FormItem label="Policy" prop="policy" key="policy">
+                <Input v-model.trim="formData.sessionAffinity.policy" placeholder="请输入policy" />
+              </FormItem>
+              <FormItem label="AffinityKeyName" prop="affinityKeyName" key="affinityKeyName">
+                <Input v-model.trim="formData.sessionAffinity.affinityKeyName" placeholder="请输入AffinityKeyName" />
               </FormItem>
               <FormItem label="失败策略[FailurePolicy]" :label-width="180">
                 <!-- <Input v-model.trim="formData.sessionAffinity.failurePolicy" placeholder="请输入失败策略" /> -->
@@ -161,20 +147,40 @@
                 </Select>
               </FormItem>
             </Row>
-            <FormItem label="设置[Settings]">
-              <div class="flex flex-col">
-                <div v-for="(item, index) in formData.sessionAffinity.settings" :key="index" class="flex col-center margin-bottom-16 IP-row">
-                  <Input v-model.trim="item.key" placeholder="请输入key"/>
-                  <Input v-model.trim="item.value" placeholder="请输入value"/>
-                  <div class="flex col-center row-center icon" @click="handleDeleteKeyValue('sessionAffinity', 'settings', index)" v-if="formData.sessionAffinity.settings && formData.sessionAffinity.settings.length > 1">
-                    <img src="~@/assets/images/gateWay/delete.png" alt="">
-                  </div>
-                  <div class="flex col-center row-center icon" @click="handleAddKeyValue(formData.sessionAffinity.settings)" v-if="formData.sessionAffinity.settings.length == index + 1">
-                    <img src="~@/assets/images/gateWay/add.png" alt="">
-                  </div>
-                </div>
-              </div>
-            </FormItem>
+            <span>Cookie配置<span class="module-content">[Cookie]</span></span>
+            <i-switch v-model="formData.sessionAffinity.cookie.enabled" style="margin-left: 10px;" />
+            <div class="module-content" v-if="formData.sessionAffinity.cookie.enabled">
+              <Row type="flex">
+                <FormItem label="Path[Path]" prop="path" key="path">
+                  <Input v-model="formData.sessionAffinity.cookie.path" placeholder="请输入Path" />
+                </FormItem>
+                <FormItem label="Domain[Domain]" prop="domain" key="domain">
+                  <Input v-model="formData.sessionAffinity.cookie.domain" placeholder="请输入Domain" />
+                </FormItem>
+                <FormItem label="Expiration[Expiration]" prop="expiration" key="expiration">
+                  <Input v-model="formData.sessionAffinity.cookie.expiration" placeholder="请输入Expiration" />
+                </FormItem>
+                <FormItem prop="httpOnly" key="httpOnly">
+                  <Checkbox v-model="formData.sessionAffinity.cookie.httpOnly">是否httpOnly</Checkbox>
+                </FormItem>
+                <FormItem label="SecurePolicy[SecurePolicy]" :label-width="180">
+                  <Select v-model="formData.sessionAffinity.cookie.securePolicy" placeholder="请选择SecurePolicy" transfer clearable>
+                    <Option v-for="(type, index) in securePolicyList" :key="index" :value="type.value">{{type.name}}</Option>
+                  </Select>
+                </FormItem>
+                <FormItem label="SameSiteMode[SameSiteMode]" :label-width="180">
+                  <Select v-model="formData.sessionAffinity.cookie.sameSite" placeholder="请选择SameSiteMode" transfer clearable>
+                    <Option v-for="(type, index) in sameSiteModeList" :key="index" :value="type.value">{{type.name}}</Option>
+                  </Select>
+                </FormItem>
+                <FormItem label="MaxAge[MaxAge]" prop="maxAge" key="maxAge">
+                  <Input v-model="formData.sessionAffinity.cookie.maxAge" placeholder="请输入MaxAge" />
+                </FormItem>
+                <FormItem prop="isEssential" key="isEssential">
+                  <Checkbox v-model="formData.sessionAffinity.cookie.isEssential">是否Essential</Checkbox>
+                </FormItem>
+              </Row>
+            </div>
           </Form>
         </div>
       </template>
@@ -257,15 +263,21 @@ export default {
         sessionAffinity: { // 会话亲和性
           id: 0,
           enabled: false,
-          mode: "Cookie",
+          policy: "Cookie",
           failurePolicy: "Redistribute", // Redistribute、Return503
-          settings: [
-            { 
-              key: "",
-              value: "",
-              id: 0
-            }
-          ],
+          affinityKeyName: "",
+          cookie: {
+            id: 0,
+            enabled: false,
+            path: "",
+            domain: "",
+            httpOnly: true,
+            securePolicy: 0,
+            sameSite: 0,
+            expiration: "",
+            maxAge: "",
+            isEssential: true
+          },
           clusterId: null
         },
         healthCheck: { // 健康检查
@@ -293,28 +305,27 @@ export default {
           enabled: false,
           sslProtocols: [], // 协议名称(多选)，最终以英文逗号,隔开的字符串
           dangerousAcceptAnyServerCertificate: false, // 客户端是否检查服务器端SSL证书的有效性。将其设置为' true '完全禁用验证。默认值为“false”。
-          clientCertificate: {
+          maxConnectionsPerServer: 0,
+          webProxy: {
             id: 0,
-            path: "",
-            keyPath: "",
-            password: "",
-            subject: "",
-            store: "",
-            location: "",
-            allowInvalid: false,
-            proxyHttpClientOptionsId: 0
-          }, // 客户端[X509Certificate]证书，用于在服务端对客户端进行身份验证，
-          maxConnectionsPerServer: 1, // 同一服务器上同时打开的HTTP 1.1连接的最大数量是：2147483647
-          activityContextHeaders: "", // 指定传出请求的活动关联标头
+            enabled: false,
+            address: "",
+            bypassOnLocal: true,
+            useDefaultCredentials: true,
+            httpClientConfigId: 0,
+            httpClientConfig: ""
+          }, 
+          requestHeaderEncoding: "", // 指定传出请求的活动关联标头
           enableMultipleHttp2Connections: false,
           clusterId: null
         },
         httpRequest: { // HTTP请求配置
           id: 0,
           enabled: false,
-          timeout: "00:00:30", // 格式(00:00:30)如此（页面上输入毫秒，转为时分秒格式）
+          activityTimeout: "00:00:30", // 格式(00:00:30)如此（页面上输入毫秒，转为时分秒格式）
           version: "", // 外发请求[Version]。目前支持的值是' 1.0 '、' 1.1 '和' 2 '。默认值为2。
           versionPolicy: "RequestVersionOrLower", // 定义如何为外发请求选择最终版本。["RequestVersionOrLower", "RequestVersionOrHigher", "RequestVersionExact"]
+          allowResponseBuffering: false,
           clusterId: null
         },
         destinations: [ // 目的地
@@ -343,37 +354,43 @@ export default {
       },
       clearFormData: {
         id: "",
-        loadBalancingPolicy: "RoundRobin",
-        sessionAffinity: {
+        loadBalancingPolicy: "RoundRobin", // 默认RoundRobin，可chash
+        sessionAffinity: { // 会话亲和性
           id: 0,
           enabled: false,
-          mode: "Cookie",
-          failurePolicy: "Redistribute",
-          settings: [
-            { 
-              key: "",
-              value: "",
-              id: 0
-            }
-          ],
+          policy: "Cookie",
+          failurePolicy: "Redistribute", // Redistribute、Return503
+          affinityKeyName: "",
+          cookie: {
+            id: 0,
+            enabled: false,
+            path: "",
+            domain: "",
+            httpOnly: true,
+            securePolicy: 0,
+            sameSite: 0,
+            expiration: "",
+            maxAge: "",
+            isEssential: true
+          },
           clusterId: null
         },
-        healthCheck: {
+        healthCheck: { // 健康检查
           id: 0,
-          passive: {
+          passive: { // 被动
             id: 0,
             enabled: false,
             policy: "TransportFailureRate",
-            reactivationPeriod: "00:02:00",
+            reactivationPeriod: "00:02:00", // 重启激活周期00:02:00
             healthCheckOptionsId: 0
           },
-          active: {
+          active: { // 主动
             id: 0,
             enabled: false,
-            interval: "00:00:15",
-            timeout: "00:00:10",
-            policy: "ConsecutiveFailures",
-            path: "",
+            interval: "00:00:15", // 发送运行状况探测请求的周期。默认“00:00:15”
+            timeout: "00:00:10", // 调查请求超时。默认“00:00:10”
+            policy: "ConsecutiveFailures", // 评估目的地活动运行状况状态的策略的名称。必填
+            path: "", // 所有集群目标上的运行状况检查路径。默认"null",/api/health
             healthCheckOptionsId: 0
           },
           clusterId: null
@@ -381,42 +398,53 @@ export default {
         httpClient: {
           id: 0,
           enabled: false,
-          sslProtocols: "",
-          dangerousAcceptAnyServerCertificate: false,
-          clientCertificate: {
+          sslProtocols: [], // 协议名称(多选)，最终以英文逗号,隔开的字符串
+          dangerousAcceptAnyServerCertificate: false, // 客户端是否检查服务器端SSL证书的有效性。将其设置为' true '完全禁用验证。默认值为“false”。
+          maxConnectionsPerServer: 0,
+          webProxy: {
             id: 0,
-            path: "",
-            keyPath: "",
-            password: "",
-            subject: "",
-            store: "",
-            location: "",
-            allowInvalid: false,
-            proxyHttpClientOptionsId: 0
-          },
-          maxConnectionsPerServer: 1,
-          activityContextHeaders: "",
+            enabled: false,
+            address: "",
+            bypassOnLocal: true,
+            useDefaultCredentials: true,
+            httpClientConfigId: 0,
+            httpClientConfig: ""
+          }, 
+          requestHeaderEncoding: "", // 指定传出请求的活动关联标头
           enableMultipleHttp2Connections: false,
           clusterId: null
         },
-        httpRequest: {
+        httpRequest: { // HTTP请求配置
           id: 0,
           enabled: false,
-          timeout: "00:00:30",
-          version: "1",
-          versionPolicy: "RequestVersionOrLower",
+          activityTimeout: "00:00:30", // 格式(00:00:30)如此（页面上输入毫秒，转为时分秒格式）
+          version: "", // 外发请求[Version]。目前支持的值是' 1.0 '、' 1.1 '和' 2 '。默认值为2。
+          versionPolicy: "RequestVersionOrLower", // 定义如何为外发请求选择最终版本。["RequestVersionOrLower", "RequestVersionOrHigher", "RequestVersionExact"]
+          allowResponseBuffering: false,
           clusterId: null
         },
-        destinations: [
+        destinations: [ // 目的地
           {
             id: 0,
             name: "",
             address: "",
             health: "",
-            metadata: []
+            metadata: [ // 元数据
+              // {
+              //   key: "",
+              //   value: "",
+              //   id: 0
+              // }
+            ]
           }
         ],
-        metadata: [],
+        metadata: [
+          // {
+          //   key: "",
+          //   value: "",
+          //   id: 0
+          // }
+        ],
         proxyRoutes: []
       },
       validateFormData: {

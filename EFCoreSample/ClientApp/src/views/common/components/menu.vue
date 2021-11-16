@@ -3,8 +3,8 @@
     <div class="sidebar-wrap" :class="{shrink: !value}">
       <div class="sidebar-box">
         <Row id="logo" type="flex" align="middle" justify="center">
-          <img :src="$stores.Logo | getImgUrl" alt="logo" v-if="$stores.Logo">
-          <img :src="defaultLogo" v-else>
+          <!-- <img :src="$stores.Logo | getImgUrl" alt="logo" v-if="$stores.Logo">
+          <img :src="defaultLogo" v-else> -->
         </Row>
         <div class="sidebar-menu">
           <Row v-for="item in showMenu" :key="item.MenuId">

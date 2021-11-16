@@ -4,7 +4,6 @@
       <div class="top login-wrap">
         <Row type="flex" align="middle" justify="center" class="logo">
           <!-- <img src="~@/assets/images/common/logo.png" alt="logo"> -->
-          <img src="~@/assets/images/common/brand-logo.png" alt="logo">
         </Row>
       </div>
     </div>
@@ -40,7 +39,7 @@
       <div class="blue"></div>
     </div>
     <div class="bottom-wrap">
-      <div class="bottom login-wrap color-999">©2019&nbsp;深圳市宸熠珠宝科技有限公司 粤ICP备17142766号-3</div>
+      <div class="bottom login-wrap color-999">©2019&nbsp;copy-right</div>
     </div>
   </div>
 </template>

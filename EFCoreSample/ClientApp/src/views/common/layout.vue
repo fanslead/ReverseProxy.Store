@@ -12,10 +12,10 @@
             <span class="name">{{showName}}</span>
             <div class="user-name-arrow"></div>
           </Row>
-          <div class="topbar-wrap" v-show="false && showTopBar">
+          <!-- <div class="topbar-wrap" v-show="false && showTopBar">
             <span @click="showPwdModal=true">修改密码</span>
             <span @click="afterLogout">切换账号</span>
-          </div>
+          </div> -->
         </div>
       </Row>
       <tab-nav @set_include="setInclude" v-show="!isHome" v-model="isExpand"></tab-nav>
@@ -26,7 +26,7 @@
           </keep-alive>
         <!-- </scrollView> -->
       </div>
-      <div id="copy-right" v-show="!isHome">©2019&nbsp;深圳市宸熠珠宝科技有限公司 粤ICP备17142766号-3</div>
+      <div id="copy-right" v-show="!isHome">©2019&nbsp;copy-right</div>
     </div>
   </Row>
 </template>

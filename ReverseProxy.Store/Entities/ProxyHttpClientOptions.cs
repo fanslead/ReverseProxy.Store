@@ -34,7 +34,7 @@ namespace ReverseProxy.Store.Entity
         /// <summary>
         /// Optional web proxy used when communicating with the destination server. 
         /// </summary>
-        public WebProxyConfig? WebProxy { get; init; }
+        public virtual WebProxyConfig? WebProxy { get; init; }
 
 #if NET
         /// <summary>
