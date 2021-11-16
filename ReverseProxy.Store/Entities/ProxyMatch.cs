@@ -26,7 +26,7 @@ namespace ReverseProxy.Store.Entity
         /// <summary>
         /// Only match requests that contain all of these query parameters.
         /// </summary>
-        public List<RouteQueryParameter> QueryParameters { get; set; }
+        public virtual List<RouteQueryParameter> QueryParameters { get; set; }
 
         public virtual List<RouteHeader> Headers { get; set; }
 

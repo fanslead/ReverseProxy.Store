@@ -55,6 +55,28 @@
                 <Input v-model.trim="formData.match.path" placeholder="请输入路径" style="width:100%;" />
               </FormItem>
             </Row>
+            
+            <Row type="flex">
+              <FormItem label="查詢參數[QueryParameters]" prop="queryParameters">
+                <div class="flex flex-col">
+                  <div v-for="(item, index) in formData.match.queryParameters" :key="index" class="flex col-center margin-bottom-16 IP-row">
+                    <Select v-model="item.mode" placeholder="请选择模式" transfer clearable>
+                      <Option v-for="modetype in queryParameterMatchMode" :key="modetype.Id" :value="modetype.Id">{{modetype.Name}}</Option>
+                    </Select>
+                    <Input v-model.trim="item.name" placeholder="请输入name" />
+                    <Input v-model.trim="item.values" placeholder="请输入values" style="width:350px;" />
+                    <Checkbox v-model="item.isCaseSensitive">是否区分大小写</Checkbox>
+                    <div class="flex col-center row-center icon" @click="handleDeleteKeyValue('match', 'headers', index)" v-if="formData.match.headers && formData.match.headers.length > 1">
+                      <img src="~@/assets/images/gateWay/delete.png" alt="">
+                    </div>
+                    <div class="flex col-center row-center icon" @click="handleAddKeyValue(formData.match.headers, 'headers')" v-if="formData.match.headers.length == index + 1">
+                      <img src="~@/assets/images/gateWay/add.png" alt="">
+                    </div>
+                  </div>
+                </div>
+              </FormItem>
+            </Row>
+
             <Row type="flex">
               <FormItem label="头部[Headers]" prop="headers">
                 <div class="flex flex-col">
@@ -143,6 +165,14 @@ export default {
           methods: [], // 方法,提交时转换为英文逗号隔开的字符串
           hosts: "", // 主机名
           path: "",
+          queryParameters: [
+            {
+              name: "",
+              values: "",
+              mode: 0,
+              isCaseSensitive: true
+            }
+          ],
           headers: [
             {
               // id: 0,
@@ -183,6 +213,14 @@ export default {
           methods: [],
           hosts: "",
           path: "",
+          queryParameters: [
+            {
+              name: "",
+              values: "",
+              mode: 0,
+              isCaseSensitive: true
+            }
+          ],
           headers: [
             {
               id: 0,

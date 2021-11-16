@@ -317,6 +317,28 @@ export default {
           ]
         },
       ],
+      queryParameterMatchMode: [
+        {
+          Id: 0,
+          Name: "Exact"
+        },
+        {
+          Id: 1,
+          Name: "Contains"
+        },
+        {
+          Id: 2,
+          Name: "NotContains"
+        },
+        {
+          Id: 3,
+          Name: "Prefix"
+        },
+        {
+          Id: 4,
+          Name: "Exists"
+        }
+      ],
       headerMatchMode: [
         {
           Id: 0,
@@ -328,6 +350,14 @@ export default {
         },
         {
           Id: 2,
+          Name: "Contains"
+        },
+        {
+          Id: 3,
+          Name: "NotContains"
+        },
+        {
+          Id: 4,
           Name: "Exists"
         }
       ],
