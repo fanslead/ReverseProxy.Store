@@ -3,7 +3,7 @@ yarp用EFCore存储配置
 安裝
 > Install-Package ReverseProxy.Store.EFCore -Version 1.0.0
 
-
+或者
 > dotnet add package ReverseProxy.Store.EFCore --version 1.0.0
 
 # 使用界面
