@@ -30,7 +30,7 @@ builder.Services.AddSingleton<IValidator<ProxyRoute>, ProxyRouteValidator>();
 builder.Services.AddDbContext<EFCoreDbContext>(options =>
         options.UseSqlServer(
             builder.Configuration.GetConnectionString("Default"),
-            b => b.MigrationsAssembly("EFCoreSample")));
+            b => b.MigrationsAssembly("ReverseProxy.WebApi")));
 
 builder.Services.AddTransient<IClusterManagement, ClusterManagement>();
 builder.Services.AddTransient<IProxyRouteManagement, ProxyRouteManagement>();
