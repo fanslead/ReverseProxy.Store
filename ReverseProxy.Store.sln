@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31005.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReverseProxy.Store", "ReverseProxy.Store\ReverseProxy.Store.csproj", "{A123A8C3-9464-47E2-954F-47208F24907E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseProxy.Store", "ReverseProxy.Store\ReverseProxy.Store.csproj", "{A123A8C3-9464-47E2-954F-47208F24907E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReverseProxy.Store.EFCore", "ReverseProxy.Store.EFCore\ReverseProxy.Store.EFCore.csproj", "{BD81CF13-EE87-490C-A946-E8242CA165F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseProxy.Store.EFCore", "ReverseProxy.Store.EFCore\ReverseProxy.Store.EFCore.csproj", "{BD81CF13-EE87-490C-A946-E8242CA165F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFCoreSample", "EFCoreSample\EFCoreSample.csproj", "{5717CBE3-B745-4F7B-A4B5-60266C368FC1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReverseProxy.Dashboard", "ReverseProxy.Dashboard\ReverseProxy.Dashboard.csproj", "{F6D4AACD-1D35-4775-8881-800604F57B37}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReverseProxy.WebApi", "ReverseProxy.WebApi\ReverseProxy.WebApi.csproj", "{6460B07E-89D5-4335-A6E1-87B532FA3935}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +25,14 @@ Global
 		{BD81CF13-EE87-490C-A946-E8242CA165F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD81CF13-EE87-490C-A946-E8242CA165F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD81CF13-EE87-490C-A946-E8242CA165F3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5717CBE3-B745-4F7B-A4B5-60266C368FC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5717CBE3-B745-4F7B-A4B5-60266C368FC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5717CBE3-B745-4F7B-A4B5-60266C368FC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5717CBE3-B745-4F7B-A4B5-60266C368FC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6D4AACD-1D35-4775-8881-800604F57B37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6D4AACD-1D35-4775-8881-800604F57B37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6D4AACD-1D35-4775-8881-800604F57B37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6D4AACD-1D35-4775-8881-800604F57B37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6460B07E-89D5-4335-A6E1-87B532FA3935}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6460B07E-89D5-4335-A6E1-87B532FA3935}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6460B07E-89D5-4335-A6E1-87B532FA3935}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6460B07E-89D5-4335-A6E1-87B532FA3935}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

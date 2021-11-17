@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using ReverseProxy.Store.Entity;
 using Microsoft.Extensions.Configuration;
 
-namespace EFCoreSample.Controllers
+namespace ReverseProxy.WebApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]

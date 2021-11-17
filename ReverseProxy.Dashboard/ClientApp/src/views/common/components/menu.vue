@@ -67,7 +67,7 @@ export default {
   },
   data() {
     return {
-      defaultLogo: require('@/assets/images/common/default-logo.png')
+      //defaultLogo: require('@/assets/images/common/default-logo.png')
     }
   },
   methods: {

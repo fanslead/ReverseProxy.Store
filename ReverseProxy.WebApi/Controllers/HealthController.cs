@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace EFCoreSample.Controllers
+namespace ReverseProxy.WebApi.Controllers
 {
     /// <summary>
     /// Controller for health check api.

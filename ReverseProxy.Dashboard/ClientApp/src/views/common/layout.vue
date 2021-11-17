@@ -8,8 +8,8 @@
         </Row>
         <div class="user-info-wrap" @mouseover="showTop" @mouseout="hideTop">
           <Row class="user-info" type="flex" align="middle" v-if="false">
-            <img :src="userImg">
-            <span class="name">{{showName}}</span>
+            <!--<img :src="userImg">-->
+            <!--<span class="name">{{showName}}</span>-->
             <div class="user-name-arrow"></div>
           </Row>
           <!-- <div class="topbar-wrap" v-show="false && showTopBar">
@@ -43,12 +43,12 @@ export default {
     return {
       includeList: [],
       activeMenuId: '',
-      userImg: require('@/assets/images/common/userImg.png'),
+      //userImg: require('@/assets/images/common/userImg.png'),
       show: false,
       showPwdModal: false,
       showTopBar: false,
       isExpand: true,
-      defaultLogo: require('@/assets/images/common/default-logo.png')
+      //defaultLogo: require('@/assets/images/common/default-logo.png')
     }
   },
   computed: {

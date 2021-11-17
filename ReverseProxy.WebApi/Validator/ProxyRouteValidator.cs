@@ -1,20 +1,16 @@
 ﻿using FluentValidation;
 using ReverseProxy.Store.Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace EFCoreSample.Validator
+namespace ReverseProxy.WebApi.Validator
 {
     public class ProxyRouteValidator : AbstractValidator<ProxyRoute>
     {
         public ProxyRouteValidator()
         {
-            RuleFor(x=>x.Match.Methods)
-                .Must(methods => 
+            RuleFor(x => x.Match.Methods)
+                .Must(methods =>
                 {
-                    var ms = new[] { "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "CONNECT", "OPTIONS", "TRACE" };
+                    var ms = new[] { "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "CONNECT", "OPTIONS", "TRACE", "PATCH" };
                     var arr = methods.Split(",");
                     if (arr.Length > 0)
                     {
@@ -23,7 +19,7 @@ namespace EFCoreSample.Validator
                     return true;
                 })
                 .When(x => x.Match != null)
-                .WithMessage("ProxyRoute.Match.Methods must in (GET, POST, PUT, DELETE, OPTIONS, HEAD, CONNECT, OPTIONS, TRACE)")
+                .WithMessage("ProxyRoute.Match.Methods must in (GET, POST, PUT, DELETE, OPTIONS, HEAD, CONNECT, OPTIONS, TRACE, PATCH)")
                 ;
         }
     }
