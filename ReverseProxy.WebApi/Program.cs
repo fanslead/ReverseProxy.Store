@@ -25,7 +25,7 @@ builder.Services.AddSingleton<IValidator<ProxyRoute>, ProxyRouteValidator>();
 //        options.UseMySql(
 //            Configuration.GetConnectionString("Default"),
 //            ServerVersion.AutoDetect(Configuration.GetConnectionString("Default")),
-//            b => b.MigrationsAssembly("EFCoreSample")));
+//            b => b.MigrationsAssembly("ReverseProxy.WebApi")));
 
 builder.Services.AddDbContext<EFCoreDbContext>(options =>
         options.UseSqlServer(
