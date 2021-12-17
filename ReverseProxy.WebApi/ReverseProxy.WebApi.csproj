@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ReverseProxy.Store.Distributed\ReverseProxy.Store.Distributed.csproj" />
     <ProjectReference Include="..\ReverseProxy.Store.EFCore\ReverseProxy.Store.EFCore.csproj" />
     <ProjectReference Include="..\ReverseProxy.Store\ReverseProxy.Store.csproj" />
   </ItemGroup>

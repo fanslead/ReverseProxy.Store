@@ -7,9 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseProxy.Store", "Rever
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseProxy.Store.EFCore", "ReverseProxy.Store.EFCore\ReverseProxy.Store.EFCore.csproj", "{BD81CF13-EE87-490C-A946-E8242CA165F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReverseProxy.Dashboard", "ReverseProxy.Dashboard\ReverseProxy.Dashboard.csproj", "{F6D4AACD-1D35-4775-8881-800604F57B37}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseProxy.Dashboard", "ReverseProxy.Dashboard\ReverseProxy.Dashboard.csproj", "{F6D4AACD-1D35-4775-8881-800604F57B37}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReverseProxy.WebApi", "ReverseProxy.WebApi\ReverseProxy.WebApi.csproj", "{6460B07E-89D5-4335-A6E1-87B532FA3935}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseProxy.WebApi", "ReverseProxy.WebApi\ReverseProxy.WebApi.csproj", "{6460B07E-89D5-4335-A6E1-87B532FA3935}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReverseProxy.Store.Distributed", "ReverseProxy.Store.Distributed\ReverseProxy.Store.Distributed.csproj", "{FB5D55C7-7F16-46DC-AE6A-648FA38E3488}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{6460B07E-89D5-4335-A6E1-87B532FA3935}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6460B07E-89D5-4335-A6E1-87B532FA3935}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6460B07E-89D5-4335-A6E1-87B532FA3935}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB5D55C7-7F16-46DC-AE6A-648FA38E3488}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB5D55C7-7F16-46DC-AE6A-648FA38E3488}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB5D55C7-7F16-46DC-AE6A-648FA38E3488}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB5D55C7-7F16-46DC-AE6A-648FA38E3488}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

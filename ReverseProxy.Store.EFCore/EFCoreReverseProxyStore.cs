@@ -12,6 +12,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using ReverseProxy.Store.Entity;
 using Yarp.ReverseProxy.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace ReverseProxy.Store.EFCore
 {
@@ -20,11 +21,15 @@ namespace ReverseProxy.Store.EFCore
         private EFCoreReloadToken _reloadToken = new EFCoreReloadToken();
         private IServiceProvider _sp;
         private IMemoryCache _cache;
+        private ILogger Logger;
+        public event ConfigChangeHandler ChangeConfig;
 
-        public EFCoreReverseProxyStore(IServiceProvider sp, IMemoryCache cache)
+        public EFCoreReverseProxyStore(IServiceProvider sp, IMemoryCache cache, ILoggerFactory loggerFactory)
         {
+            Logger = loggerFactory.CreateLogger<EFCoreReverseProxyStore>();
             _sp = sp;
             _cache = cache;
+            ChangeConfig += ReloadConfig;
         }
 
         // Used by tests
@@ -32,6 +37,7 @@ namespace ReverseProxy.Store.EFCore
 
         public IProxyConfig GetConfig()
         {
+            Logger.LogInformation("GetConfig");
             var exist = _cache.TryGetValue<IProxyConfig>("ReverseProxyConfig", out IProxyConfig config);
             if (exist)
             {
@@ -54,6 +60,13 @@ namespace ReverseProxy.Store.EFCore
 
         public void Reload()
         {
+            Logger.LogInformation("ChangeConfig");
+            if (ChangeConfig != null)
+                ChangeConfig();
+        }
+        public void ReloadConfig()
+        {
+            Logger.LogInformation("SetConfig");
             SetConfig();
             Interlocked.Exchange<EFCoreReloadToken>(ref this._reloadToken,
                 new EFCoreReloadToken()).OnReload();
@@ -389,5 +402,6 @@ namespace ReverseProxy.Store.EFCore
                 Metadata = destination.Metadata.ReadStringDictionary(),
             };
         }
+
     }
 }
