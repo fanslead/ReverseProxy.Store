@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	  <Version>1.0.2</Version>
+	  <Version>1.0.3</Version>
 	  <Authors>FunShow</Authors>
 	  <Description>https://github.com/fanslead/ReverseProxy.Store</Description>
 	  <PackageProjectUrl>https://github.com/fanslead/ReverseProxy.Store</PackageProjectUrl>
