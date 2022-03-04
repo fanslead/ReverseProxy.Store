@@ -158,7 +158,7 @@ namespace ReverseProxy.Store.EFCore
             {
                 return null;
             }
-            var groupTransforms = transforms.GroupBy(t => t.Type);
+            var groupTransforms = transforms.OrderBy(t=>t.Id).GroupBy(t => t.Type);
             var list = new List<IReadOnlyDictionary<string, string>>();
             foreach (var group in groupTransforms)
             {
