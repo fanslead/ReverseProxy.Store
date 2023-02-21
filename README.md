@@ -6,10 +6,17 @@
 
 yarp用EFCore存储配置
 安裝
-> Install-Package ReverseProxy.Store.EFCore -Version 1.0.0
+> Install-Package ReverseProxy.Store.EFCore -Version 2.0.0
 
 或者
-> dotnet add package ReverseProxy.Store.EFCore --version 1.0.0
+> dotnet add package ReverseProxy.Store.EFCore --version 2.0.0
+
+分布式同步配置更新
+安裝
+> Install-Package ReverseProxy.Store.Distributed -Version 2.0.0
+
+或者
+> dotnet add package ReverseProxy.Store.Distributed --version 2.0.0
 
 # 使用界面
 ## 使用说明
@@ -37,7 +44,8 @@ public void ConfigureServices(IServiceCollection services)
     services.AddTransient<IClusterManagement, ClusterManagement>();
     services.AddTransient<IProxyRouteManagement, ProxyRouteManagement>();
     services.AddReverseProxy()
-            .LoadFromEFCore();
+            .LoadFromEFCore()
+             //.AddRedis("127.0.0.1:6379"); //使用redis同步配置更新
 }
 ```
 然后就可以自己实现业务API管理配置内容啦~~~
