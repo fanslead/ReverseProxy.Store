@@ -1,15 +1,26 @@
 # ReverseProxy.Store
-
+![image](https://img.shields.io/nuget/dt/ReverseProxy.Store)
+![image](https://img.shields.io/github/license/fanslead/ReverseProxy.Store)
+![image](https://img.shields.io/github/v/release/fanslead/ReverseProxy.Store)
+![image](https://img.shields.io/github/stars/fanslead/ReverseProxy.Store?style=social)
+![image](https://img.shields.io/github/forks/fanslead/ReverseProxy.Store?style=social)
 ## 先看界面
 ![1639733073(1)](https://user-images.githubusercontent.com/22066473/146521329-9c8d04b4-dc99-47a0-87bc-cc081e9b5cc4.jpg)
 ![image](https://user-images.githubusercontent.com/22066473/146521423-48df866b-4299-4628-b6aa-c8d4fbfcbe43.png)
 
 yarp用EFCore存储配置
 安裝
-> Install-Package ReverseProxy.Store.EFCore -Version 1.0.0
+> Install-Package ReverseProxy.Store.EFCore -Version 2.0.0
 
 或者
-> dotnet add package ReverseProxy.Store.EFCore --version 1.0.0
+> dotnet add package ReverseProxy.Store.EFCore --version 2.0.0
+
+分布式同步配置更新
+安裝
+> Install-Package ReverseProxy.Store.Distributed -Version 2.0.0
+
+或者
+> dotnet add package ReverseProxy.Store.Distributed --version 2.0.0
 
 # 使用界面
 ## 使用说明
@@ -37,7 +48,8 @@ public void ConfigureServices(IServiceCollection services)
     services.AddTransient<IClusterManagement, ClusterManagement>();
     services.AddTransient<IProxyRouteManagement, ProxyRouteManagement>();
     services.AddReverseProxy()
-            .LoadFromEFCore();
+            .LoadFromEFCore()
+             //.AddRedis("127.0.0.1:6379"); //使用redis同步配置更新
 }
 ```
 然后就可以自己实现业务API管理配置内容啦~~~
