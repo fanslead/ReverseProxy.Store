@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ReverseProxy.Store.Entity
+namespace ReverseProxy.Store.Entities
 {
     public class CertificateConfig
     {

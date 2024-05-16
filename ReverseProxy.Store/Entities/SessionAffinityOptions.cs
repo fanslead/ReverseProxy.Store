@@ -1,70 +1,64 @@
-﻿using ReverseProxy.Store.Entities;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿namespace ReverseProxy.Store.Entities;
 
-namespace ReverseProxy.Store.Entity
+public class SessionAffinityConfig
 {
-    public class SessionAffinityConfig
+    [Key]
+    public int Id { get; set; }
+
+    /// <summary>
+    /// Indicates whether session affinity is enabled.
+    /// </summary>
+    public bool? Enabled { get; init; }
+
+    /// <summary>
+    /// The session affinity policy to use.
+    /// </summary>
+    public string? Policy { get; init; }
+
+    /// <summary>
+    /// Strategy handling missing destination for an affinitized request.
+    /// </summary>
+    public string? FailurePolicy { get; init; }
+
+    /// <summary>
+    /// Identifies the name of the field where the affinity value is stored.
+    /// For the cookie affinity policy this will be the cookie name.
+    /// For the header affinity policy this will be the header name.
+    /// The policy will give its own default if no value is set.
+    /// This value should be unique across clusters to avoid affinity conflicts.
+    /// https://github.com/microsoft/reverse-proxy/issues/976
+    /// This field is required.
+    /// </summary>
+    public string AffinityKeyName { get; init; } = default!;
+
+    /// <summary>
+    /// Configuration of a cookie storing the session affinity key in case
+    /// the <see cref="Policy"/> is set to 'Cookie'.
+    /// </summary>
+    public SessionAffinityCookie? Cookie { get; init; }
+
+    public bool Equals(SessionAffinityConfig? other)
     {
-        [Key]
-        public int Id { get; set; }
-
-        /// <summary>
-        /// Indicates whether session affinity is enabled.
-        /// </summary>
-        public bool? Enabled { get; init; }
-
-        /// <summary>
-        /// The session affinity policy to use.
-        /// </summary>
-        public string? Policy { get; init; }
-
-        /// <summary>
-        /// Strategy handling missing destination for an affinitized request.
-        /// </summary>
-        public string? FailurePolicy { get; init; }
-
-        /// <summary>
-        /// Identifies the name of the field where the affinity value is stored.
-        /// For the cookie affinity policy this will be the cookie name.
-        /// For the header affinity policy this will be the header name.
-        /// The policy will give its own default if no value is set.
-        /// This value should be unique across clusters to avoid affinity conflicts.
-        /// https://github.com/microsoft/reverse-proxy/issues/976
-        /// This field is required.
-        /// </summary>
-        public string AffinityKeyName { get; init; } = default!;
-
-        /// <summary>
-        /// Configuration of a cookie storing the session affinity key in case
-        /// the <see cref="Policy"/> is set to 'Cookie'.
-        /// </summary>
-        public SessionAffinityCookie? Cookie { get; init; }
-
-        public bool Equals(SessionAffinityConfig? other)
+        if (other == null)
         {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return Enabled == other.Enabled
-                && string.Equals(Policy, other.Policy, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(FailurePolicy, other.FailurePolicy, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(AffinityKeyName, other.AffinityKeyName, StringComparison.Ordinal)
-                && Cookie == other.Cookie;
+            return false;
         }
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Enabled,
-                Policy?.GetHashCode(StringComparison.OrdinalIgnoreCase),
-                FailurePolicy?.GetHashCode(StringComparison.OrdinalIgnoreCase),
-                AffinityKeyName?.GetHashCode(StringComparison.Ordinal),
-                Cookie);
-        }
-        public string ClusterId { get; set; }
-        public virtual Cluster Cluster { get; set; }
+        return Enabled == other.Enabled
+            && string.Equals(Policy, other.Policy, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(FailurePolicy, other.FailurePolicy, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(AffinityKeyName, other.AffinityKeyName, StringComparison.Ordinal)
+            && Cookie == other.Cookie;
     }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Enabled,
+            Policy?.GetHashCode(StringComparison.OrdinalIgnoreCase),
+            FailurePolicy?.GetHashCode(StringComparison.OrdinalIgnoreCase),
+            AffinityKeyName?.GetHashCode(StringComparison.Ordinal),
+            Cookie);
+    }
+    public string ClusterId { get; set; }
+    public virtual Cluster Cluster { get; set; }
 }

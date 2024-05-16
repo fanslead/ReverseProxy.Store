@@ -1,7 +1,7 @@
 using ReverseProxy.WebApi.Validator;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using ReverseProxy.Store.Entity;
+using ReverseProxy.Store.Entities;
 using ReverseProxy.Store.EFCore;
 using Microsoft.EntityFrameworkCore;
 using ReverseProxy.Store.EFCore.Management;

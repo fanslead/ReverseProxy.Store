@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ReverseProxy.Store.Entity;
+using ReverseProxy.Store.Entities;
 using Microsoft.Extensions.Configuration;
 
 namespace ReverseProxy.WebApi.Controllers

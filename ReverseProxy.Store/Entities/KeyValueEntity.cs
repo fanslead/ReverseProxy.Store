@@ -1,8 +1,7 @@
-﻿namespace ReverseProxy.Store.Entity
+﻿namespace ReverseProxy.Store.Entities;
+
+public class KeyValueEntity
 {
-    public class KeyValueEntity
-    {
-        public string Key { get; set; }
-        public string Value { get; set; }
-    }
+    public string Key { get; set; }
+    public string Value { get; set; }
 }

@@ -1,61 +1,52 @@
-﻿using ReverseProxy.Store.Entity;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace ReverseProxy.Store.Entities;
 
-namespace ReverseProxy.Store.Entities
+
+/// <summary>
+/// Config used to construct <seealso cref="System.Net.WebProxy"/> instance.
+/// </summary>
+public class WebProxyConfig : IEquatable<WebProxyConfig>
 {
+    [Key]
+    public int Id { get; set; }
+    /// <summary>
+    /// The URI of the proxy server.
+    /// </summary>
+    public string Address { get; init; }
 
     /// <summary>
-    /// Config used to construct <seealso cref="System.Net.WebProxy"/> instance.
+    /// true to bypass the proxy for local addresses; otherwise, false.
+    /// If null, default value will be used: false
     /// </summary>
-    public class WebProxyConfig : IEquatable<WebProxyConfig>
+    public bool? BypassOnLocal { get; init; }
+
+    /// <summary>
+    /// Controls whether the <seealso cref="System.Net.CredentialCache.DefaultCredentials"/> are sent with requests.
+    /// If null, default value will be used: false
+    /// </summary>
+    public bool? UseDefaultCredentials { get; init; }
+    public int HttpClientConfigId { get; init; }
+    public virtual HttpClientConfig HttpClientConfig { get; init; }
+
+
+
+    public bool Equals(WebProxyConfig? other)
     {
-        [Key]
-        public int Id { get; set; }
-        /// <summary>
-        /// The URI of the proxy server.
-        /// </summary>
-        public string Address { get; init; }
-
-        /// <summary>
-        /// true to bypass the proxy for local addresses; otherwise, false.
-        /// If null, default value will be used: false
-        /// </summary>
-        public bool? BypassOnLocal { get; init; }
-
-        /// <summary>
-        /// Controls whether the <seealso cref="System.Net.CredentialCache.DefaultCredentials"/> are sent with requests.
-        /// If null, default value will be used: false
-        /// </summary>
-        public bool? UseDefaultCredentials { get; init; }
-        public int HttpClientConfigId { get; init; }
-        public virtual HttpClientConfig HttpClientConfig { get; init; }
-
-
-
-        public bool Equals(WebProxyConfig? other)
+        if (other == null)
         {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return Address == other.Address
-                && BypassOnLocal == other.BypassOnLocal
-                && UseDefaultCredentials == other.UseDefaultCredentials;
+            return false;
         }
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(
-                Address,
-                BypassOnLocal,
-                UseDefaultCredentials
-            );
-        }
+        return Address == other.Address
+            && BypassOnLocal == other.BypassOnLocal
+            && UseDefaultCredentials == other.UseDefaultCredentials;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(
+            Address,
+            BypassOnLocal,
+            UseDefaultCredentials
+        );
     }
 }

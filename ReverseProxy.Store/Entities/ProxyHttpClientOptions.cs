@@ -3,7 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Authentication;
 
-namespace ReverseProxy.Store.Entity
+namespace ReverseProxy.Store.Entities
 {
     public class HttpClientConfig
     {

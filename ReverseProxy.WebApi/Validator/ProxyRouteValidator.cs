@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using ReverseProxy.Store.Entity;
+using ReverseProxy.Store.Entities;
 
 namespace ReverseProxy.WebApi.Validator
 {

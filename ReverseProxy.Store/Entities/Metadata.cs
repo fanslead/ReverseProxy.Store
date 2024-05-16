@@ -1,10 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace ReverseProxy.Store.Entities;
 
-namespace ReverseProxy.Store.Entity
+public class Metadata : KeyValueEntity
 {
-    public class Metadata : KeyValueEntity
-    {
-        [Key]
-        public int Id { get; set; }
-    }
+    [Key]
+    public int Id { get; set; }
 }
