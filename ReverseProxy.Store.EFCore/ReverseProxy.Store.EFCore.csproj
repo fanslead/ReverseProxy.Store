@@ -7,6 +7,7 @@
 	  <Description>https://github.com/fanslead/ReverseProxy.Store</Description>
 	  <PackageProjectUrl>https://github.com/fanslead/ReverseProxy.Store</PackageProjectUrl>
 	  <RepositoryUrl>https://github.com/fanslead/ReverseProxy.Store</RepositoryUrl>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <PackageTags>ReverseProxy,yarp</PackageTags>
   </PropertyGroup>
 
