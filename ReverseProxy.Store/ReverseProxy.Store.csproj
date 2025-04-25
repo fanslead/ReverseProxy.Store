@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <Version>2.2.0</Version>
+    <Version>2.3.0</Version>
     <Authors>FunShow</Authors>
     <Description>https://github.com/fanslead/ReverseProxy.Store</Description>
     <PackageProjectUrl>https://github.com/fanslead/ReverseProxy.Store</PackageProjectUrl>
@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Yarp.ReverseProxy" Version="2.2.0" />
+    <PackageReference Include="Yarp.ReverseProxy" Version="2.3.0" />
   </ItemGroup>
 
 </Project>
