@@ -1,5 +1,7 @@
 # ReverseProxy.Store
 
+English | [简体中文](README_CN.md)
+
 [![NuGet downloads](https://img.shields.io/nuget/dt/ReverseProxy.Store)](https://www.nuget.org/packages/ReverseProxy.Store)
 [![License](https://img.shields.io/github/license/fanslead/ReverseProxy.Store)](LICENSE)
 
