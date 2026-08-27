@@ -7,6 +7,8 @@ import type {
   DraftSummary,
   PagedResponse,
   ProxyConfigDocument,
+  Revision,
+  RevisionSummary,
   RuntimeConfiguration,
   RuntimeStatus,
   ValidationResult
@@ -56,5 +58,16 @@ export const controlPlane = {
     csrf: true,
     headers: { 'If-Match': etag }
   }),
+  listRevisions: (page = 1, pageSize = 25) => {
+    const query = new URLSearchParams({ page: String(page), pageSize: String(pageSize) })
+    return apiRequest<PagedResponse<RevisionSummary>>(`/api/v1/revisions?${query}`)
+  },
+  getRevision: (id: string) => apiRequest<Revision>(`/api/v1/revisions/${id}`),
+  rollbackRevision: (id: string, expectedActiveRevisionId: string) =>
+    apiRequest<ConfigOperation>(`/api/v1/revisions/${id}/rollback`, {
+      method: 'POST',
+      csrf: true,
+      body: { expectedActiveRevisionId }
+    }),
   operation: (id: string) => apiRequest<ConfigOperation>(`/api/v1/operations/${id}`)
 }

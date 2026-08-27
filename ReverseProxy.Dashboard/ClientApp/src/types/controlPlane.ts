@@ -85,6 +85,20 @@ export interface Draft extends Omit<DraftSummary, 'routeCount' | 'clusterCount'>
   document: ProxyConfigDocument
 }
 
+export interface RevisionSummary {
+  id: string
+  revisionNumber: number
+  schemaVersion: number
+  contentHash: string
+  publishedBy: string
+  publishedAt: string
+  isActive: boolean
+}
+
+export interface Revision extends RevisionSummary {
+  document: ProxyConfigDocument
+}
+
 export interface ValidationError {
   code: string
   path: string

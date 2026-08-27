@@ -25,6 +25,7 @@ Signal Plane 按运维任务组织控制面，而不是向用户暴露底层存�
 - **工作台 / 概览**：展示运行健康状态、生效版本、请求链路和进行中的配置变更。
 - **配置管理 / 路由与集群**：展示当前生效的资源目录及其关联关系。生效资源为只读；新建或修改资源时会进入安全的配置变更流程。
 - **变更与发布 / 配置变更**：提供表单与 JSON 编辑、服务端验证、差异审查、乐观并发控制和发布功能。
+- **变更与发布 / 版本历史**：提供不可变发布快照审查，以及带生效版本并发保护的前向恢复。
 
 响应式界面默认使用简体中文，并可随时切换为英文。
 
@@ -56,7 +57,7 @@ Signal Plane 按运维任务组织控制面，而不是向用户暴露底层存�
 | 生效运行配置 | `/api/v1/runtime/status`、`/api/v1/runtime/configuration` |
 | 配置变更 | `/api/v1/drafts`、`/api/v1/drafts/{id}/validate`、`/api/v1/drafts/{id}/diff`、`/api/v1/drafts/{id}/publish` |
 | 版本历史 | `/api/v1/revisions`、`/api/v1/revisions/{id}`、`/api/v1/revisions/{id}/rollback` |
-| 发布操作 | `/api/v1/operations/{id}` |
+| 配置操作 | `/api/v1/operations/{id}` |
 
 ## 发布模型
 

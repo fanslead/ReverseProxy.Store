@@ -20,7 +20,8 @@ const router = createRouter({
         { path: 'configuration/routes', name: 'routes', component: () => import('@/views/ResourcesView.vue'), props: { resourceKind: 'routes' }, meta: { titleKey: 'pageTitle.routes' } },
         { path: 'configuration/clusters', name: 'clusters', component: () => import('@/views/ResourcesView.vue'), props: { resourceKind: 'clusters' }, meta: { titleKey: 'pageTitle.clusters' } },
         { path: 'changes', alias: '/drafts', name: 'changes', component: () => import('@/views/DraftsView.vue'), meta: { titleKey: 'pageTitle.changes' } },
-        { path: 'changes/:id', alias: '/drafts/:id', name: 'studio', component: () => import('@/views/StudioView.vue'), meta: { titleKey: 'pageTitle.studio' } }
+        { path: 'changes/:id', alias: '/drafts/:id', name: 'studio', component: () => import('@/views/StudioView.vue'), meta: { titleKey: 'pageTitle.studio' } },
+        { path: 'revisions', name: 'revisions', component: () => import('@/views/RevisionsView.vue'), meta: { titleKey: 'pageTitle.revisions' } }
       ]
     },
     { path: '/:pathMatch(.*)*', redirect: '/' }

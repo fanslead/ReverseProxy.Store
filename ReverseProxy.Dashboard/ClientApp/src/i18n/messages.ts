@@ -15,6 +15,7 @@ export const messages = {
       routes: '路由管理',
       clusters: '集群管理',
       changes: '配置变更',
+      revisions: '版本历史',
       studio: '配置工作台',
       console: '控制台'
     },
@@ -27,13 +28,15 @@ export const messages = {
       overview: '概览',
       routes: '路由',
       clusters: '集群',
-      changes: '配置变更'
+      changes: '配置变更',
+      revisions: '版本历史'
     },
     shell: {
       controlPlane: '控制面',
       connected: '已连接',
       apiConnected: 'API 已连接',
-      signOut: '退出登录'
+      signOut: '退出登录',
+      signOutFailed: '服务端退出失败，本地会话已清除。'
     },
     role: {
       Administrator: '管理员',
@@ -166,6 +169,46 @@ export const messages = {
         failed: '无法创建配置变更。'
       }
     },
+    revisions: {
+      eyebrow: '变更与发布 / 不可变台账',
+      title: '版本历史',
+      summary: '审查每次发布的不可变快照，并将历史配置以前向方式恢复为新版本。',
+      activeRevision: '当前版本',
+      revisionCount: '历史版本',
+      invariant: '恢复规则',
+      forwardOnly: '仅生成新版本',
+      refresh: '刷新版本历史',
+      total: '共 {count} 个版本',
+      loadFailed: '无法加载版本历史。',
+      detailFailed: '无法加载版本详情。',
+      empty: '尚未生成配置版本。',
+      active: '生效中',
+      historical: '历史',
+      schema: 'Schema',
+      publishedBy: '发布者',
+      publishedAt: '发布时间',
+      hash: '内容哈希',
+      inspect: '查看版本',
+      inspectNamed: '查看版本 r{revision}',
+      detailTitle: '版本 r{revision}',
+      document: '规范化配置文档',
+      resourceCount: '路由 {routes} / 集群 {clusters}',
+      rollback: '恢复为新版本',
+      rollbackConfirm: '将版本 r{revision} 的配置恢复为一个新的生效版本？',
+      rollbackNote: '历史记录不会被改写。恢复操作会重新验证此文档并创建编号更高的新版本。',
+      rollbackSuccess: '已创建恢复版本 r{revision}，状态：{status}',
+      rollbackFailed: '无法恢复此历史版本。',
+      operationFailed: '无法获取恢复操作的最新状态，请刷新版本历史。',
+      currentNotice: '此版本当前正在生效，无需恢复。',
+      table: {
+        revision: '版本',
+        state: '状态',
+        hash: '哈希',
+        publisher: '发布者',
+        published: '发布时间',
+        actions: '操作'
+      }
+    },
     trace: {
       ariaLabel: '当前请求路径',
       livePath: '实时路径',
@@ -192,6 +235,12 @@ export const messages = {
       operation_not_found: '找不到该配置操作。',
       draft_not_found: '找不到该配置变更。',
       draft_version_conflict: '配置变更已在其他位置更新，请重新加载。',
+      revision_not_found: '找不到该配置版本。',
+      active_revision_conflict: '生效版本已变化，请刷新版本历史后重试。',
+      revision_already_active: '该版本已处于生效状态。',
+      rollback_revision_invalid: '该历史版本已无法通过当前配置验证。',
+      revision_integrity_failure: '版本完整性检查失败，无法读取或恢复。',
+      invalid_active_revision: '预期生效版本无效。',
       unexpected_error: '服务端发生意外错误。',
       antiforgery_unavailable: '无法建立安全会话，请刷新页面后重试。',
       status400: '请求内容无效。',
@@ -339,6 +388,7 @@ export const messages = {
       routes: 'Route management',
       clusters: 'Cluster management',
       changes: 'Configuration changes',
+      revisions: 'Revision history',
       studio: 'Configuration studio',
       console: 'Console'
     },
@@ -351,13 +401,15 @@ export const messages = {
       overview: 'Overview',
       routes: 'Routes',
       clusters: 'Clusters',
-      changes: 'Changes'
+      changes: 'Changes',
+      revisions: 'Revisions'
     },
     shell: {
       controlPlane: 'Control plane',
       connected: 'Connected',
       apiConnected: 'API connected',
-      signOut: 'Sign out'
+      signOut: 'Sign out',
+      signOutFailed: 'Server sign-out failed. The local session was cleared.'
     },
     role: {
       Administrator: 'Administrator',
@@ -490,6 +542,46 @@ export const messages = {
         failed: 'Configuration change could not be created.'
       }
     },
+    revisions: {
+      eyebrow: 'Changes & delivery / immutable ledger',
+      title: 'Revision history',
+      summary: 'Inspect every immutable release snapshot and restore historical configuration as a new revision.',
+      activeRevision: 'Active revision',
+      revisionCount: 'Revisions',
+      invariant: 'Restore rule',
+      forwardOnly: 'New revisions only',
+      refresh: 'Refresh revision history',
+      total: '{count} revision | {count} revisions',
+      loadFailed: 'Revision history could not be loaded.',
+      detailFailed: 'Revision details could not be loaded.',
+      empty: 'No configuration revisions have been created.',
+      active: 'Active',
+      historical: 'Historical',
+      schema: 'Schema',
+      publishedBy: 'Published by',
+      publishedAt: 'Published at',
+      hash: 'Content hash',
+      inspect: 'Inspect revision',
+      inspectNamed: 'Inspect revision r{revision}',
+      detailTitle: 'Revision r{revision}',
+      document: 'Canonical configuration document',
+      resourceCount: '{routes} routes / {clusters} clusters',
+      rollback: 'Restore as new revision',
+      rollbackConfirm: 'Restore the configuration from revision r{revision} as a new active revision?',
+      rollbackNote: 'History remains immutable. Restore revalidates this document and creates a revision with a higher number.',
+      rollbackSuccess: 'Restore revision r{revision} created with status: {status}',
+      rollbackFailed: 'This historical revision could not be restored.',
+      operationFailed: 'The latest restore status could not be loaded. Refresh revision history.',
+      currentNotice: 'This revision is currently active and does not need to be restored.',
+      table: {
+        revision: 'Revision',
+        state: 'State',
+        hash: 'Hash',
+        publisher: 'Publisher',
+        published: 'Published',
+        actions: 'Actions'
+      }
+    },
     trace: {
       ariaLabel: 'Active request path',
       livePath: 'Live path',
@@ -516,6 +608,12 @@ export const messages = {
       operation_not_found: 'The configuration operation was not found.',
       draft_not_found: 'The configuration change was not found.',
       draft_version_conflict: 'The configuration change was updated elsewhere. Reload it before continuing.',
+      revision_not_found: 'The configuration revision was not found.',
+      active_revision_conflict: 'The active revision changed. Refresh revision history and try again.',
+      revision_already_active: 'This revision is already active.',
+      rollback_revision_invalid: 'This historical revision no longer passes configuration validation.',
+      revision_integrity_failure: 'The revision failed its integrity check and cannot be read or restored.',
+      invalid_active_revision: 'The expected active revision is invalid.',
       unexpected_error: 'The server encountered an unexpected error.',
       antiforgery_unavailable: 'Unable to establish a secure session. Refresh the page and try again.',
       status400: 'The request is invalid.',

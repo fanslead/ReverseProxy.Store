@@ -2,7 +2,8 @@
 import { computed, type Component } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { Activity, FileStack, LayoutDashboard, LogOut, Route as RouteIcon, Server } from '@lucide/vue'
+import { Message } from '@arco-design/web-vue'
+import { Activity, FileClock, FileStack, LayoutDashboard, LogOut, Route as RouteIcon, Server } from '@lucide/vue'
 import BrandMark from '@/components/BrandMark.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import { useSessionStore } from '@/stores/session'
@@ -38,7 +39,10 @@ const navigationSections: NavigationSection[] = [
   },
   {
     labelKey: 'nav.delivery',
-    items: [{ name: 'changes', labelKey: 'nav.changes', icon: FileStack, activeNames: ['studio'] }]
+    items: [
+      { name: 'changes', labelKey: 'nav.changes', icon: FileStack, activeNames: ['studio'] },
+      { name: 'revisions', labelKey: 'nav.revisions', icon: FileClock }
+    ]
   }
 ]
 const navigation = navigationSections.flatMap(section => section.items)
@@ -55,7 +59,11 @@ function isActive(item: NavigationItem) {
 }
 
 async function signOut() {
-  await session.logout()
+  try {
+    await session.logout()
+  } catch {
+    Message.warning(t('shell.signOutFailed'))
+  }
   await router.replace({ name: 'login' })
 }
 </script>
@@ -204,7 +212,7 @@ async function signOut() {
   .mobile-user { display: flex; align-items: center; gap: 6px; }
   .mobile-user :deep(.language-switcher) { height: 32px; }
   .mobile-logout { display: grid; width: 34px; height: 34px; padding: 0; color: var(--muted); background: transparent; border: 0; place-items: center; }
-  .mobile-nav { position: fixed; inset: auto 0 0; z-index: 30; display: grid; height: 68px; padding-bottom: env(safe-area-inset-bottom); background: rgb(20 32 29 / 96%); border-top: 1px solid #31423c; grid-template-columns: repeat(4, 1fr); }
+  .mobile-nav { position: fixed; inset: auto 0 0; z-index: 30; display: grid; height: 68px; padding-bottom: env(safe-area-inset-bottom); background: rgb(20 32 29 / 96%); border-top: 1px solid #31423c; grid-template-columns: repeat(5, 1fr); }
   .mobile-nav a { display: grid; color: #91a39c; font-size: 10px; place-items: center; align-content: center; gap: 4px; }
   .mobile-nav a.active { color: #fff; }
   .mobile-nav a.active svg { color: #55d0b3; }

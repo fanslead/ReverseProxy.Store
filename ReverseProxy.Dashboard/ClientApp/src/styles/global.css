@@ -204,9 +204,15 @@ a {
   to { opacity: 1; }
 }
 
+@media (max-width: 900px) {
+  .page {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+}
+
 @media (max-width: 720px) {
   .page {
-    padding: 24px 18px 92px;
+    padding: 24px 18px calc(92px + env(safe-area-inset-bottom));
   }
 
   .page-header {

@@ -25,6 +25,7 @@ Signal Plane organizes the control plane around operator tasks rather than stora
 - **Workspace / Overview** shows runtime health, the active revision, request flow, and changes in progress.
 - **Configuration / Routes and Clusters** exposes the active resource catalog and its relationships. Active resources are read-only; creating or editing one starts a safe configuration change.
 - **Changes & delivery / Configuration changes** provides form and JSON editing, server validation, diff review, optimistic concurrency, and publishing.
+- **Changes & delivery / Revision history** provides immutable release inspection and forward-only restore with active-revision concurrency protection.
 
 The responsive interface defaults to Simplified Chinese and can be switched to English at any time.
 
@@ -56,7 +57,7 @@ The primary HTTP surfaces are:
 | Active runtime | `/api/v1/runtime/status`, `/api/v1/runtime/configuration` |
 | Configuration changes | `/api/v1/drafts`, `/api/v1/drafts/{id}/validate`, `/api/v1/drafts/{id}/diff`, `/api/v1/drafts/{id}/publish` |
 | Revision history | `/api/v1/revisions`, `/api/v1/revisions/{id}`, `/api/v1/revisions/{id}/rollback` |
-| Publish operations | `/api/v1/operations/{id}` |
+| Configuration operations | `/api/v1/operations/{id}` |
 
 ## Publish Model
 
