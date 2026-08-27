@@ -48,7 +48,8 @@ async function getAntiforgeryToken(): Promise<AntiforgeryToken> {
 
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<ApiResult<T>> {
   const headers = new Headers(options.headers)
-  if (options.body !== undefined) headers.set('Content-Type', 'application/json')
+  const body = options.body === undefined ? undefined : JSON.stringify(options.body)
+  if (body !== undefined) headers.set('Content-Type', 'application/json')
 
   if (options.csrf) {
     const token = await getAntiforgeryToken()
@@ -58,7 +59,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   const response = await fetch(path, {
     ...options,
     headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    body,
     credentials: 'include'
   })
 

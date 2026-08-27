@@ -3,12 +3,13 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ClusterConfig, RouteConfig } from '@/types/controlPlane'
 
-const props = defineProps<{ route: RouteConfig; clusters: ClusterConfig[] }>()
+const props = defineProps<{ route: RouteConfig; clusters: ClusterConfig[]; readonly: boolean }>()
 const { t } = useI18n()
 
 const methods = computed({
   get: () => props.route.match.methods?.join(', ') ?? '',
   set: value => {
+    if (props.readonly) return
     const parsed = value.split(',').map(item => item.trim().toUpperCase()).filter(Boolean)
     if (parsed.length) props.route.match.methods = parsed
     else delete props.route.match.methods
@@ -18,6 +19,7 @@ const methods = computed({
 const removePrefix = computed({
   get: () => props.route.transforms?.find(transform => 'PathRemovePrefix' in transform)?.PathRemovePrefix ?? '',
   set: value => {
+    if (props.readonly) return
     const transforms = [...(props.route.transforms ?? [])]
     const index = transforms.findIndex(transform => 'PathRemovePrefix' in transform)
     if (value) {
@@ -40,17 +42,17 @@ const removePrefix = computed({
       <div class="form-grid">
         <label class="field field-wide">
           <span>{{ t('editor.route.routeId') }}</span>
-          <a-input v-model="route.routeId" placeholder="orders-route" />
+          <a-input v-model="route.routeId" :disabled="readonly" placeholder="orders-route" />
         </label>
         <label class="field">
           <span>{{ t('editor.route.cluster') }}</span>
-          <a-select v-model="route.clusterId" allow-clear :placeholder="t('editor.route.selectCluster')">
+          <a-select v-model="route.clusterId" allow-clear :disabled="readonly" :placeholder="t('editor.route.selectCluster')">
             <a-option v-for="cluster in clusters" :key="cluster.clusterId" :value="cluster.clusterId">{{ cluster.clusterId }}</a-option>
           </a-select>
         </label>
         <label class="field">
           <span>{{ t('editor.route.order') }}</span>
-          <a-input-number v-model="route.order" placeholder="0" />
+          <a-input-number v-model="route.order" :disabled="readonly" placeholder="0" />
         </label>
       </div>
     </div>
@@ -60,11 +62,11 @@ const removePrefix = computed({
       <div class="form-grid">
         <label class="field field-wide">
           <span>{{ t('editor.route.pathPattern') }}</span>
-          <a-input v-model="route.match.path" placeholder="/orders/{**catch-all}" />
+          <a-input v-model="route.match.path" :disabled="readonly" placeholder="/orders/{**catch-all}" />
         </label>
         <label class="field field-wide">
           <span>{{ t('editor.route.methods') }}</span>
-          <a-input v-model="methods" placeholder="GET, POST" />
+          <a-input v-model="methods" :disabled="readonly" placeholder="GET, POST" />
           <small>{{ t('editor.route.methodsHint') }}</small>
         </label>
       </div>
@@ -74,7 +76,7 @@ const removePrefix = computed({
       <div class="editor-section-title"><span>{{ t('editor.route.transform') }}</span><small>{{ t('editor.route.outbound') }}</small></div>
       <label class="field">
         <span>{{ t('editor.route.removePrefix') }}</span>
-        <a-input v-model="removePrefix" placeholder="/orders" />
+        <a-input v-model="removePrefix" :disabled="readonly" placeholder="/orders" />
       </label>
     </div>
   </div>

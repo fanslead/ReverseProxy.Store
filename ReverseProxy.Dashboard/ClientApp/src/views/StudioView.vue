@@ -59,20 +59,38 @@ const validation = ref<ValidationResult | null>(null)
 const diff = ref<ConfigDiff | null>(null)
 const reviewVisible = ref(false)
 const publishedOperation = ref<ConfigOperation | null>(null)
+let activeSave: { draftId: string; promise: Promise<boolean> } | null = null
+let reviewedDraftId: string | null = null
+let reviewedSnapshot = ''
 
 const document = computed(() => draft.value?.document)
 const resources = computed(() => resourceKind.value === 'routes' ? document.value?.routes ?? [] : document.value?.clusters ?? [])
 const selectedRoute = computed(() => resourceKind.value === 'routes' ? document.value?.routes[selectedIndex.value] : undefined)
 const selectedCluster = computed(() => resourceKind.value === 'clusters' ? document.value?.clusters[selectedIndex.value] : undefined)
 const selectedTitle = computed(() => selectedRoute.value?.routeId ?? selectedCluster.value?.clusterId ?? t('studio.noResourceSelected'))
+const jsonBufferDirty = computed(() => Boolean(
+  mode.value === 'json'
+  && document.value
+  && rawJson.value !== JSON.stringify(document.value, null, 2)
+))
 const dirty = computed(() => {
   if (!draft.value) return false
-  return JSON.stringify({ name: name.value, document: draft.value.document }) !== baseline.value
+  return jsonBufferDirty.value
+    || JSON.stringify({ name: name.value, document: draft.value.document }) !== baseline.value
 })
 
 function setBaseline() {
   if (!draft.value) return
   baseline.value = JSON.stringify({ name: name.value, document: draft.value.document })
+}
+
+function createEditorSnapshot() {
+  return JSON.stringify({
+    etag: etag.value,
+    name: name.value,
+    document: draft.value?.document,
+    rawJson: rawJson.value
+  })
 }
 
 function normalizeDocument(value: ProxyConfigDocument): ProxyConfigDocument {
@@ -97,6 +115,7 @@ async function load() {
     name.value = result.data.name
     etag.value = result.response.headers.get('etag') ?? `"${result.data.rowVersion}"`
     rawJson.value = JSON.stringify(result.data.document, null, 2)
+    jsonError.value = ''
     setBaseline()
     applyEntryIntent()
   } catch (reason) {
@@ -131,18 +150,33 @@ function applyEntryIntent() {
 }
 
 function selectKind(kind: ResourceKind) {
+  if (!switchMode('structured')) return
   resourceKind.value = kind
   selectedIndex.value = 0
-  mode.value = 'structured'
 }
 
 function selectResource(index: number) {
-  selectedIndex.value = index
-  mode.value = 'structured'
+  if (mode.value === 'structured') {
+    selectedIndex.value = index
+    return
+  }
+  const selectedResource = resources.value[index]
+  const selectedResourceId = selectedResource
+    ? 'routeId' in selectedResource ? selectedResource.routeId : selectedResource.clusterId
+    : null
+  if (!switchMode('structured')) return
+  const matchingIndex = selectedResourceId === null
+    ? -1
+    : resources.value.findIndex(resource =>
+        'routeId' in resource ? resource.routeId === selectedResourceId : resource.clusterId === selectedResourceId)
+  selectedIndex.value = matchingIndex >= 0
+    ? matchingIndex
+    : Math.max(0, Math.min(index, resources.value.length - 1))
 }
 
 function addRoute() {
   if (!document.value || !session.canEdit) return
+  if (!switchMode('structured')) return
   const routeConfig: RouteConfig = {
     routeId: `route-${document.value.routes.length + 1}`,
     clusterId: document.value.clusters[0]?.clusterId,
@@ -151,11 +185,11 @@ function addRoute() {
   document.value.routes.push(routeConfig)
   resourceKind.value = 'routes'
   selectedIndex.value = document.value.routes.length - 1
-  mode.value = 'structured'
 }
 
 function addCluster() {
   if (!document.value || !session.canEdit) return
+  if (!switchMode('structured')) return
   const cluster: ClusterConfig = {
     clusterId: `cluster-${document.value.clusters.length + 1}`,
     destinations: { primary: { address: 'https://' } }
@@ -163,7 +197,6 @@ function addCluster() {
   document.value.clusters.push(cluster)
   resourceKind.value = 'clusters'
   selectedIndex.value = document.value.clusters.length - 1
-  mode.value = 'structured'
 }
 
 function removeSelected() {
@@ -173,12 +206,17 @@ function removeSelected() {
   selectedIndex.value = Math.max(0, Math.min(selectedIndex.value, collection.length - 1))
 }
 
-function switchMode(nextMode: EditorMode) {
+function switchMode(nextMode: EditorMode): boolean {
+  if (nextMode === mode.value) return true
+  if (mode.value === 'json' && nextMode === 'structured' && jsonBufferDirty.value && !applyJson(false)) {
+    return false
+  }
   if (nextMode === 'json' && document.value) {
     rawJson.value = JSON.stringify(document.value, null, 2)
     jsonError.value = ''
   }
   mode.value = nextMode
+  return true
 }
 
 function applyJson(showMessage = true) {
@@ -188,10 +226,15 @@ function applyJson(showMessage = true) {
       throw new Error(t('studio.schemaExpected'))
     }
     if (!draft.value) return false
+    const selectedResourceId = selectedRoute.value?.routeId ?? selectedCluster.value?.clusterId
     draft.value.document = normalizeDocument(parsed)
     rawJson.value = JSON.stringify(draft.value.document, null, 2)
     jsonError.value = ''
-    selectedIndex.value = 0
+    const matchingIndex = selectedResourceId === undefined
+      ? -1
+      : resources.value.findIndex(resource =>
+          'routeId' in resource ? resource.routeId === selectedResourceId : resource.clusterId === selectedResourceId)
+    selectedIndex.value = matchingIndex >= 0 ? matchingIndex : 0
     if (showMessage) Message.success(t('studio.jsonApplied'))
     return true
   } catch (reason) {
@@ -202,40 +245,84 @@ function applyJson(showMessage = true) {
   }
 }
 
-async function save() {
+function save(): Promise<boolean> {
+  const requestedDraftId = draftId.value
+  if (activeSave) {
+    return activeSave.draftId === requestedDraftId
+      ? activeSave.promise
+      : Promise.resolve(false)
+  }
+
+  const promise = saveCurrentDraft(requestedDraftId)
+  activeSave = { draftId: requestedDraftId, promise }
+  const clearActiveSave = () => {
+    if (activeSave?.promise === promise) activeSave = null
+  }
+  void promise.then(clearActiveSave, clearActiveSave)
+  return promise
+}
+
+async function saveCurrentDraft(requestedDraftId: string) {
   if (!draft.value || !session.canEdit) return false
   if (mode.value === 'json' && !applyJson(false)) return false
   if (!dirty.value) return true
 
   saving.value = true
   try {
-    const result = await controlPlane.updateDraft(draftId.value, name.value.trim(), draft.value.document, etag.value)
+    const requestName = name.value.trim()
+    const requestDocument = JSON.parse(JSON.stringify(draft.value.document)) as ProxyConfigDocument
+    const editorSnapshot = createEditorSnapshot()
+    const result = await controlPlane.updateDraft(requestedDraftId, requestName, requestDocument, etag.value)
+    if (requestedDraftId !== draftId.value) return true
     result.data.document = normalizeDocument(result.data.document)
-    draft.value = result.data
-    name.value = result.data.name
+    const hasNewLocalChanges = createEditorSnapshot() !== editorSnapshot
+    const currentName = name.value
+    const currentDocument = draft.value.document
+    const currentRawJson = rawJson.value
+    draft.value = hasNewLocalChanges
+      ? { ...result.data, document: currentDocument }
+      : result.data
+    name.value = hasNewLocalChanges ? currentName : result.data.name
     etag.value = result.response.headers.get('etag') ?? `"${result.data.rowVersion}"`
-    rawJson.value = JSON.stringify(result.data.document, null, 2)
-    setBaseline()
+    rawJson.value = hasNewLocalChanges ? currentRawJson : JSON.stringify(result.data.document, null, 2)
+    baseline.value = JSON.stringify({ name: result.data.name, document: result.data.document })
     Message.success(t('studio.draftSaved'))
     return true
   } catch (reason) {
-    Message.error(localizeApiError(reason, 'studio.saveFailed'))
+    if (requestedDraftId === draftId.value) Message.error(localizeApiError(reason, 'studio.saveFailed'))
     return false
   } finally {
     saving.value = false
   }
 }
 
+async function savePendingChanges(requestedDraftId: string) {
+  while (requestedDraftId === draftId.value) {
+    if (activeSave) {
+      if (activeSave.draftId !== requestedDraftId || !await activeSave.promise) return false
+      continue
+    }
+    if (!dirty.value) return true
+    if (!await save()) return false
+  }
+  return false
+}
+
 async function validate() {
-  if (dirty.value && !await save()) return null
+  if (validating.value) return null
+  const requestedDraftId = draftId.value
+  if (!await savePendingChanges(requestedDraftId)) return null
+  const requestSnapshot = createEditorSnapshot()
   validating.value = true
   try {
-    validation.value = (await controlPlane.validateDraft(draftId.value)).data
+    const result = await controlPlane.validateDraft(requestedDraftId)
+    if (requestedDraftId !== draftId.value || requestSnapshot !== createEditorSnapshot()) return null
+    validation.value = result.data
     if (validation.value.isValid) Message.success(t('studio.configurationValid'))
     else Message.warning(formatValidationIssues(validation.value.errors.length))
     return validation.value
   } catch (reason) {
-    Message.error(localizeApiError(reason, 'studio.validationFailed'))
+    if (requestedDraftId === draftId.value) Message.error(localizeApiError(reason, 'studio.validationFailed'))
     return null
   } finally {
     validating.value = false
@@ -243,33 +330,44 @@ async function validate() {
 }
 
 async function openReview() {
-  if (dirty.value && !await save()) return
+  if (reviewing.value || publishing.value) return
+  const requestedDraftId = draftId.value
+  if (!await savePendingChanges(requestedDraftId)) return
+  const requestSnapshot = createEditorSnapshot()
   reviewing.value = true
   try {
     const [validationResult, diffResult] = await Promise.all([
-      controlPlane.validateDraft(draftId.value),
-      controlPlane.diffDraft(draftId.value)
+      controlPlane.validateDraft(requestedDraftId),
+      controlPlane.diffDraft(requestedDraftId)
     ])
+    if (requestedDraftId !== draftId.value || requestSnapshot !== createEditorSnapshot()) return
     validation.value = validationResult.data
     diff.value = diffResult.data
     if (!validation.value.isValid) {
       Message.warning(t('studio.resolveValidation'))
       return
     }
+    reviewedDraftId = requestedDraftId
+    reviewedSnapshot = requestSnapshot
     reviewVisible.value = true
   } catch (reason) {
-    Message.error(localizeApiError(reason, 'studio.reviewFailed'))
+    if (requestedDraftId === draftId.value) Message.error(localizeApiError(reason, 'studio.reviewFailed'))
   } finally {
     reviewing.value = false
   }
 }
 
 async function publish() {
-  if (!session.canPublish || !diff.value?.hasChanges) return
+  const requestedDraftId = draftId.value
+  if (!session.canPublish
+    || !diff.value?.hasChanges
+    || reviewedDraftId !== requestedDraftId
+    || reviewedSnapshot !== createEditorSnapshot()) return
   publishing.value = true
   try {
-    publishedOperation.value = (await controlPlane.publishDraft(draftId.value, etag.value)).data
-    const refreshed = await controlPlane.getDraft(draftId.value)
+    publishedOperation.value = (await controlPlane.publishDraft(requestedDraftId, etag.value)).data
+    const refreshed = await controlPlane.getDraft(requestedDraftId)
+    if (requestedDraftId !== draftId.value) return
     refreshed.data.document = normalizeDocument(refreshed.data.document)
     draft.value = refreshed.data
     name.value = refreshed.data.name
@@ -287,7 +385,7 @@ async function publish() {
 }
 
 function beforeUnload(event: BeforeUnloadEvent) {
-  if (!dirty.value) return
+  if (!dirty.value && !saving.value && !publishing.value) return
   event.preventDefault()
   event.returnValue = ''
 }
@@ -306,20 +404,34 @@ function formatOperationStatus(status: string) {
 }
 
 watch(dirty, isDirty => {
-  if (isDirty) validation.value = null
+  if (isDirty) {
+    validation.value = null
+    diff.value = null
+    reviewVisible.value = false
+    reviewedDraftId = null
+    reviewedSnapshot = ''
+  }
 })
 
-onBeforeRouteLeave(() => !dirty.value || window.confirm(t('studio.discardConfirm')))
+function allowNavigation() {
+  if (saving.value || validating.value || reviewing.value || publishing.value) return false
+  return !dirty.value || window.confirm(t('studio.discardConfirm'))
+}
+
+onBeforeRouteLeave(allowNavigation)
 onBeforeRouteUpdate(to => {
   if (String(to.params.id) === draftId.value) return true
-  return !dirty.value || window.confirm(t('studio.discardConfirm'))
+  return allowNavigation()
 })
 watch(() => route.params.id, () => {
   draft.value = null
+  jsonError.value = ''
   validation.value = null
   diff.value = null
   reviewVisible.value = false
   publishedOperation.value = null
+  reviewedDraftId = null
+  reviewedSnapshot = ''
   selectedIndex.value = 0
   void load()
 })
@@ -409,8 +521,8 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
 
           <div class="editor-body" :class="{ readonly: !session.canEdit }">
             <template v-if="mode === 'structured'">
-              <RouteEditor v-if="selectedRoute" :route="selectedRoute" :clusters="document?.clusters ?? []" />
-              <ClusterEditor v-else-if="selectedCluster" :cluster="selectedCluster" />
+              <RouteEditor v-if="selectedRoute" :route="selectedRoute" :clusters="document?.clusters ?? []" :readonly="!session.canEdit" />
+              <ClusterEditor v-else-if="selectedCluster" :cluster="selectedCluster" :readonly="!session.canEdit" />
               <div v-else class="empty-state">
                 <div>
                   <component :is="resourceKind === 'routes' ? RouteIcon : Server" :size="30" :stroke-width="1.5" />

@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n'
 import { Plus, Trash2 } from '@lucide/vue'
 import type { ClusterConfig, DestinationConfig } from '@/types/controlPlane'
 
-const props = defineProps<{ cluster: ClusterConfig }>()
+const props = defineProps<{ cluster: ClusterConfig; readonly: boolean }>()
 const { t } = useI18n()
 
 function uniqueDestinationId() {
@@ -13,14 +13,17 @@ function uniqueDestinationId() {
 }
 
 function addDestination() {
+  if (props.readonly) return
   props.cluster.destinations[uniqueDestinationId()] = { address: 'https://' }
 }
 
 function removeDestination(id: string) {
+  if (props.readonly) return
   delete props.cluster.destinations[id]
 }
 
 function renameDestination(previousId: string, nextId: string, destination: DestinationConfig) {
+  if (props.readonly) return
   const normalized = nextId.trim()
   if (!normalized || normalized === previousId || normalized in props.cluster.destinations) return
   const entries = Object.entries(props.cluster.destinations)
@@ -35,11 +38,11 @@ function renameDestination(previousId: string, nextId: string, destination: Dest
       <div class="form-grid">
         <label class="field">
           <span>{{ t('editor.cluster.clusterId') }}</span>
-          <a-input v-model="cluster.clusterId" placeholder="orders" />
+          <a-input v-model="cluster.clusterId" :disabled="readonly" placeholder="orders" />
         </label>
         <label class="field">
           <span>{{ t('editor.cluster.loadBalancing') }}</span>
-          <a-select v-model="cluster.loadBalancingPolicy" allow-clear :placeholder="t('editor.cluster.defaultPolicy')">
+          <a-select v-model="cluster.loadBalancingPolicy" allow-clear :disabled="readonly" :placeholder="t('editor.cluster.defaultPolicy')">
             <a-option value="PowerOfTwoChoices">{{ t('editor.cluster.powerOfTwo') }}</a-option>
             <a-option value="RoundRobin">{{ t('editor.cluster.roundRobin') }}</a-option>
             <a-option value="LeastRequests">{{ t('editor.cluster.leastRequests') }}</a-option>
@@ -52,20 +55,20 @@ function renameDestination(previousId: string, nextId: string, destination: Dest
     <div class="editor-section">
       <div class="editor-section-title">
         <span>{{ t('editor.cluster.destinations') }}</span>
-        <a-button size="mini" @click="addDestination"><Plus :size="13" /> {{ t('editor.cluster.addDestination') }}</a-button>
+        <a-button size="mini" :disabled="readonly" @click="addDestination"><Plus :size="13" /> {{ t('editor.cluster.addDestination') }}</a-button>
       </div>
       <div v-if="Object.keys(cluster.destinations).length === 0" class="destination-empty">{{ t('editor.cluster.emptyDestinations') }}</div>
       <div v-else class="destination-list">
         <div v-for="(destination, id) in cluster.destinations" :key="id" class="destination-row">
           <label class="field">
             <span>{{ t('editor.cluster.destinationId') }}</span>
-            <a-input :model-value="id" @change="value => renameDestination(id, String(value), destination)" />
+            <a-input :model-value="id" :disabled="readonly" @change="value => renameDestination(id, String(value), destination)" />
           </label>
           <label class="field address-field">
             <span>{{ t('editor.cluster.address') }}</span>
-            <a-input v-model="destination.address" placeholder="https://service.internal/" />
+            <a-input v-model="destination.address" :disabled="readonly" placeholder="https://service.internal/" />
           </label>
-          <button class="remove-destination" type="button" :title="t('editor.cluster.removeDestination')" :aria-label="t('editor.cluster.removeNamed', { id })" @click="removeDestination(id)">
+          <button class="remove-destination" type="button" :disabled="readonly" :title="t('editor.cluster.removeDestination')" :aria-label="t('editor.cluster.removeNamed', { id })" @click="removeDestination(id)">
             <Trash2 :size="16" />
           </button>
         </div>
@@ -87,6 +90,7 @@ function renameDestination(previousId: string, nextId: string, destination: Dest
 .destination-row { display: grid; padding: 14px; background: var(--surface-subtle); border: 1px solid var(--line); border-radius: 4px; grid-template-columns: minmax(130px, .55fr) minmax(220px, 1.45fr) 34px; align-items: end; gap: 10px; }
 .remove-destination { display: grid; width: 32px; height: 32px; padding: 0; color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 4px; cursor: pointer; place-items: center; }
 .remove-destination:hover { color: var(--red); border-color: #e7b6b2; background: var(--red-soft); }
+.remove-destination:disabled { cursor: not-allowed; opacity: .5; }
 .destination-empty { padding: 28px; color: var(--muted); background: var(--surface-subtle); border: 1px dashed var(--line-strong); text-align: center; }
 @media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } .destination-row { grid-template-columns: 1fr 34px; } .address-field { grid-column: 1 / -1; grid-row: 2; } }
 </style>
