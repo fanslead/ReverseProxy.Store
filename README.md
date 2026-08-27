@@ -62,3 +62,7 @@ const apiConfig = {
   baseURL: orign
 };
 ```
+
+## AI Provider
+
+[![Powered by OrcaRouter](https://img.shields.io/badge/Powered_by-OrcaRouter-2563eb)](https://www.orcarouter.ai/ref/ref_293cafb35044abc53d15)
