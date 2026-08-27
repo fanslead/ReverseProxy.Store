@@ -1,0 +1,232 @@
+:root {
+  color: #17231f;
+  background: #edf1ef;
+  font-family: 'Manrope Variable', sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --ink: #17231f;
+  --ink-soft: #35423d;
+  --muted: #69736f;
+  --canvas: #edf1ef;
+  --surface: #ffffff;
+  --surface-subtle: #f7f9f8;
+  --line: #d5ddd9;
+  --line-strong: #aebbb5;
+  --nav: #14201d;
+  --nav-soft: #22302b;
+  --blue: #2458e6;
+  --blue-dark: #173b9f;
+  --green: #0a8f78;
+  --green-soft: #daf3eb;
+  --amber: #b66a08;
+  --amber-soft: #fff0d6;
+  --red: #c23b3b;
+  --red-soft: #fde7e5;
+  --shadow: 0 12px 35px rgb(23 35 31 / 8%);
+  --radius: 6px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--canvas);
+  background-image:
+    linear-gradient(rgb(23 35 31 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(23 35 31 / 3%) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 3px solid rgb(36 88 230 / 28%);
+  outline-offset: 2px;
+}
+
+.display-type {
+  font-family: 'Space Grotesk Variable', sans-serif;
+}
+
+.mono {
+  font-family: 'IBM Plex Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.page {
+  width: min(100%, 1500px);
+  margin: 0 auto;
+  padding: 34px 38px 56px;
+  animation: page-in 320ms ease-out both;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--blue);
+  font: 400 11px/1.2 'IBM Plex Mono', monospace;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.page-title {
+  margin: 0;
+  font: 650 clamp(28px, 4vw, 42px)/1 'Space Grotesk Variable', sans-serif;
+  letter-spacing: 0;
+}
+
+.page-summary {
+  max-width: 620px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 0 rgb(23 35 31 / 3%);
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font: 620 18px/1.2 'Space Grotesk Variable', sans-serif;
+}
+
+.section-heading p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.hash {
+  overflow: hidden;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty-state {
+  display: grid;
+  min-height: 240px;
+  place-items: center;
+  padding: 36px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.icon-button {
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  place-items: center;
+}
+
+.icon-button:hover {
+  background: rgb(255 255 255 / 8%);
+  border-color: rgb(255 255 255 / 12%);
+}
+
+.arco-btn {
+  border-radius: 4px;
+  font-weight: 650;
+}
+
+.arco-btn-primary {
+  background: var(--blue);
+}
+
+.arco-input-wrapper,
+.arco-textarea-wrapper,
+.arco-select-view-single,
+.arco-modal,
+.arco-drawer {
+  border-radius: 4px;
+}
+
+.arco-modal-header,
+.arco-drawer-header {
+  font-family: 'Space Grotesk Variable', sans-serif;
+}
+
+@keyframes page-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 24px 18px 92px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-bottom: 22px;
+  }
+
+  .page-header .arco-btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

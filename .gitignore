@@ -202,6 +202,7 @@ ClientBin/
 *.pfx
 *.publishsettings
 node_modules/
+*.tsbuildinfo
 orleans.codegen.cs
 
 # Since there are multiple workflows, uncomment next line to ignore bower_components

@@ -1,24 +1,17 @@
-# demo4
+# Signal Plane Client
 
-## Project setup
-```
-npm install
-```
+Vue 3 and TypeScript control console for ReverseProxy.Store 3.0.
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+The interface supports Simplified Chinese and English. Simplified Chinese is the default; operators can switch languages from the sign-in page or application shell, and the selection is persisted in local storage under `signal-plane.locale`.
 
-### Compiles and minifies for production
-```
+## Commands
+
+```bash
+npm ci
+npm run dev
+npm run typecheck
 npm run build
+npm run preview
 ```
 
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+The development server listens on `http://localhost:5173` and proxies `/api` and `/health` to `https://localhost:5201`. The production build is written to `dist` and served by `ReverseProxy.Dashboard`.

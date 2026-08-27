@@ -1,28 +1,38 @@
-using Microsoft.AspNetCore.SpaServices;
-using VueCliMiddleware;
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddSpaStaticFiles(config =>
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
-    config.RootPath = "ClientApp/dist"; //此处build 对应vue项目的发布文件夹名。
+    Args = args,
+    WebRootPath = Path.Combine("ClientApp", "dist")
 });
+
+builder.Services
+    .AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 var app = builder.Build();
 
-#region 添加单页面web应用  vue
-app.UseStaticFiles();
-app.UseSpaStaticFiles();
-#endregion
-app.UseRouting();
-app.UseEndpoints(endpoints =>
+app.Use(async (context, next) =>
 {
-    endpoints.MapToVueCliProxy(
-                       "{*path}",
-                       new SpaOptions { SourcePath = "ClientApp" },
-                       npmScript: (System.Diagnostics.Debugger.IsAttached) ? "dev" : null,
-                       regex: "Compiled successfully",
-                       forceKill: true
-                       );
+    context.Response.Headers.XContentTypeOptions = "nosniff";
+    context.Response.Headers.XFrameOptions = "DENY";
+    context.Response.Headers.ContentSecurityPolicy =
+        "default-src 'self'; connect-src 'self'; font-src 'self' data:; img-src 'self' data:; " +
+        "script-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; " +
+        "base-uri 'self'; form-action 'self'";
+    await next();
 });
+
+app.UseDefaultFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        context.Context.Response.Headers.CacheControl =
+            context.Context.Request.Path.StartsWithSegments("/assets")
+                ? "public,max-age=31536000,immutable"
+                : "no-cache";
+    }
+});
+
+app.MapReverseProxy();
+app.MapFallbackToFile("index.html");
 app.Run();

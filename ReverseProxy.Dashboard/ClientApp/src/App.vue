@@ -1,12 +1,17 @@
-<template>
-  <div id="app">
-    <router-view/>
-  </div>
-</template>
+<script setup lang="ts">
+import { watchEffect } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
-<style lang="less">
-html, body, #app, #layout {
-  height: 100%;
-  min-width: 1280px;
-}
-</style>
+const route = useRoute()
+const { t } = useI18n()
+
+watchEffect(() => {
+  const titleKey = typeof route.meta.titleKey === 'string' ? route.meta.titleKey : 'pageTitle.console'
+  document.title = `${t(titleKey)} · Signal Plane`
+})
+</script>
+
+<template>
+  <RouterView />
+</template>
