@@ -72,6 +72,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("CanView", policy => policy.RequireRole(ControlPlaneRoles.All))
     .AddPolicy("CanEdit", policy => policy.RequireRole(ControlPlaneRoles.Editor, ControlPlaneRoles.Administrator))
     .AddPolicy("CanPublish", policy => policy.RequireRole(ControlPlaneRoles.Publisher, ControlPlaneRoles.Administrator))
     .AddPolicy("CanAdminister", policy => policy.RequireRole(ControlPlaneRoles.Administrator));
@@ -114,7 +115,15 @@ builder.Services.AddProblemDetails(options =>
 });
 builder.Services.AddOpenApi("v1");
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<ConfigOperationFinalizer>();
 builder.Services.AddScoped<IConfigDraftService, ConfigDraftService>();
+builder.Services.AddScoped<IConfigRevisionService, ConfigRevisionService>();
+builder.Services.AddOptions<ConfigOperationRecoveryOptions>()
+    .Bind(builder.Configuration.GetSection(ConfigOperationRecoveryOptions.SectionName))
+    .Validate(options => options.BatchSize is > 0 and <= 1000, "Operations:BatchSize must be between 1 and 1000.")
+    .Validate(options => options.PollInterval > TimeSpan.Zero, "Operations:PollInterval must be positive.")
+    .ValidateOnStart();
+builder.Services.AddHostedService<ConfigOperationRecoveryWorker>();
 builder.Services.AddHealthChecks()
     .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), ["live"])
     .AddCheck<ControlPlaneReadinessHealthCheck>("control-plane", tags: ["ready"]);

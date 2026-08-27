@@ -1,6 +1,7 @@
 using System.Data;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using ReverseProxy.Store.EFCore.ControlPlane;
 using ReverseProxy.Store.EFCore.Revisions;
 using ReverseProxy.WebApi.Application.Common;
@@ -14,7 +15,7 @@ namespace ReverseProxy.WebApi.Application.Configuration;
 
 public sealed class ConfigDraftService(
     IDbContextFactory<ApplicationDbContext> dbContextFactory,
-    RevisionedProxyConfigProvider configProvider,
+    ConfigOperationFinalizer operationFinalizer,
     TimeProvider timeProvider) : IConfigDraftService
 {
     public async Task<PagedResponse<DraftSummaryResponse>> ListAsync(
@@ -196,9 +197,10 @@ public sealed class ConfigDraftService(
         CancellationToken cancellationToken)
     {
         ConfigOperationEntity operation;
-        await using (var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken))
-        await using (var transaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken))
+        try
         {
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+            await using var transaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
             var draft = await dbContext.ConfigDrafts
                 .Include(entity => entity.BaseRevision)
                 .SingleOrDefaultAsync(entity => entity.Id == draftId, cancellationToken)
@@ -214,6 +216,18 @@ public sealed class ConfigDraftService(
                     "configuration_invalid",
                     "The draft configuration is invalid",
                     string.Join("; ", validation.Errors.Select(error => $"{error.Path}: {error.Message}")));
+            }
+
+            var canonicalJson = ProxyConfigDocumentSerializer.SerializeCanonical(document);
+            var contentHash = ProxyConfigDocumentSerializer.ComputeHash(document);
+            if (draft.SchemaVersion != document.SchemaVersion
+                || !string.Equals(draft.ContentHash, contentHash, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ApiProblemException(
+                    StatusCodes.Status500InternalServerError,
+                    "draft_integrity_failure",
+                    "The draft failed its integrity check",
+                    $"Draft '{draft.Id}' cannot be published because its stored metadata does not match its document.");
             }
 
             var runtimeState = await dbContext.RuntimeConfigState
@@ -234,8 +248,8 @@ public sealed class ConfigDraftService(
                 Id = Guid.NewGuid(),
                 RevisionNumber = runtimeState.ActiveRevisionNumber + 1,
                 SchemaVersion = document.SchemaVersion,
-                ContentHash = draft.ContentHash,
-                DocumentJson = draft.DocumentJson,
+                ContentHash = contentHash,
+                DocumentJson = canonicalJson,
                 PublishedBy = actor.Id,
                 PublishedAt = now
             };
@@ -294,24 +308,16 @@ public sealed class ConfigDraftService(
             await SaveWithConcurrencyCheckAsync(dbContext, draftId, cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
-
-        // The revision is committed; finish recording its local application even if the client disconnects.
-        var applyResult = await configProvider.ReloadAsync(CancellationToken.None);
-        await using (var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None))
+        catch (Exception exception) when (IsConcurrencyConflict(exception))
         {
-            var persistedOperation = await dbContext.ConfigOperations
-            .SingleAsync(entity => entity.Id == operation.Id, CancellationToken.None);
-            persistedOperation.Status = applyResult.Status == ProxyConfigApplyStatus.Failed
-                ? ConfigOperationStatus.Failed
-                : ConfigOperationStatus.Applied;
-            persistedOperation.CompletedAt = timeProvider.GetUtcNow();
-            persistedOperation.ErrorCode = applyResult.ErrorCode;
-            persistedOperation.ErrorMessage = applyResult.Status == ProxyConfigApplyStatus.Failed
-                ? "The revision was published but this node retained its last-known-good configuration."
-                : null;
-            await dbContext.SaveChangesAsync(CancellationToken.None);
-            operation = persistedOperation;
+            throw new ApiProblemException(
+                StatusCodes.Status409Conflict,
+                "active_revision_conflict",
+                "The active configuration changed",
+                "Refresh the draft before attempting to publish again.");
         }
+
+        operation = await operationFinalizer.FinalizeAsync(operation.Id, CancellationToken.None);
 
         return Map(operation);
     }
@@ -448,4 +454,10 @@ public sealed class ConfigDraftService(
         "draft_name_conflict",
         "A draft with this name already exists",
         $"Draft name '{name}' is already in use.");
+
+    private static bool IsConcurrencyConflict(Exception exception) =>
+        exception.GetBaseException() is PostgresException postgresException
+        && postgresException.SqlState is PostgresErrorCodes.SerializationFailure
+            or PostgresErrorCodes.DeadlockDetected
+            or PostgresErrorCodes.UniqueViolation;
 }

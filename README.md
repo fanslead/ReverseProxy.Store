@@ -55,11 +55,14 @@ The primary HTTP surfaces are:
 | Authentication | `/api/v1/auth/antiforgery`, `/api/v1/auth/login`, `/api/v1/auth/me`, `/api/v1/auth/logout` |
 | Active runtime | `/api/v1/runtime/status`, `/api/v1/runtime/configuration` |
 | Configuration changes | `/api/v1/drafts`, `/api/v1/drafts/{id}/validate`, `/api/v1/drafts/{id}/diff`, `/api/v1/drafts/{id}/publish` |
+| Revision history | `/api/v1/revisions`, `/api/v1/revisions/{id}`, `/api/v1/revisions/{id}/rollback` |
 | Publish operations | `/api/v1/operations/{id}` |
 
 ## Publish Model
 
 Publishing runs in a serializable PostgreSQL transaction. It writes the immutable revision, moves the active revision pointer, records the operation and audit entry, and appends a typed outbox event.
+
+Rollback is forward-only: restoring a historical document creates a new, higher revision instead of moving the active pointer backward. The caller supplies the expected active revision ID, so a concurrent publish is rejected rather than overwritten. A recovery worker completes operations left in `Applying` after a process interruption.
 
 The outbox worker claims rows with `FOR UPDATE SKIP LOCKED`, publishes `proxy-config.published` events, and acknowledges successful delivery. Redis is only a low-latency hint: every subscriber reloads and validates the authoritative active revision from PostgreSQL. Duplicate and out-of-order events are safe, and periodic reconciliation covers notifications missed during a Redis outage.
 
@@ -121,6 +124,8 @@ Redis__ReconciliationInterval
 Outbox__BatchSize
 Outbox__PollInterval
 Outbox__FailureDelay
+Operations__BatchSize
+Operations__PollInterval
 AllowedHosts
 ```
 

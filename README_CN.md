@@ -55,11 +55,14 @@ Signal Plane 按运维任务组织控制面，而不是向用户暴露底层存�
 | 身份认证 | `/api/v1/auth/antiforgery`、`/api/v1/auth/login`、`/api/v1/auth/me`、`/api/v1/auth/logout` |
 | 生效运行配置 | `/api/v1/runtime/status`、`/api/v1/runtime/configuration` |
 | 配置变更 | `/api/v1/drafts`、`/api/v1/drafts/{id}/validate`、`/api/v1/drafts/{id}/diff`、`/api/v1/drafts/{id}/publish` |
+| 版本历史 | `/api/v1/revisions`、`/api/v1/revisions/{id}`、`/api/v1/revisions/{id}/rollback` |
 | 发布操作 | `/api/v1/operations/{id}` |
 
 ## 发布模型
 
 发布操作在 PostgreSQL 可序列化事务中执行。事务会写入不可变版本、移动生效版本指针、记录操作与审计条目，并追加一条强类型 outbox 事件。
+
+回滚采用前向恢复：恢复历史文档时会创建编号更高的新版本，而不是倒退生效指针。调用方必须提供预期的当前生效版本 ID，因此并发发布会被拒绝而不会被覆盖。恢复 worker 会继续处理因进程中断而停留在 `Applying` 状态的操作。
 
 Outbox worker 使用 `FOR UPDATE SKIP LOCKED` 领取记录，发布 `proxy-config.published` 事件，并在成功投递后确认。Redis 仅作为低延迟提示通道：每个订阅节点都会从 PostgreSQL 重新加载并验证权威生效版本。重复或乱序事件均可安全处理，定期对账机制会补偿 Redis 故障期间遗漏的通知。
 
@@ -121,6 +124,8 @@ Redis__ReconciliationInterval
 Outbox__BatchSize
 Outbox__PollInterval
 Outbox__FailureDelay
+Operations__BatchSize
+Operations__PollInterval
 AllowedHosts
 ```
 
